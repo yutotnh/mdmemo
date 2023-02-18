@@ -1,78 +1,53 @@
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
-import Image from "next/image";
-import reactLogo from "../assets/react.svg";
-import tauriLogo from "../assets/tauri.svg";
-import nextLogo from "../assets/next.svg";
+import "@uiw/react-md-editor/markdown-editor.css";
+import "@uiw/react-markdown-preview/markdown.css";
+import dynamic from "next/dynamic";
+import { commands, PreviewType } from "@uiw/react-md-editor";
+import * as zoom from "./zoom";
+const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
 
 function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
+  const [value, setValue] = useState("**Hello world!!!**");
+  const [preview, setPreview] = useState<PreviewType>("live");
+  const [hiddenToolbar, setHiddenToolbar] = useState(false);
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-    setGreetMsg(await invoke("greet", { name }));
+  if (process.browser) {
+    window.onblur = () => {
+      setHiddenToolbar(true);
+      setPreview("preview");
+    };
+
+    window.onfocus = () => {
+      setHiddenToolbar(false);
+      setPreview("edit");
+    };
   }
 
   return (
-    <div className="container">
-      <h1>Welcome to Tauri!</h1>
-
-      <div className="row">
-        <span className="logos">
-          <a href="https://nextjs.org" target="_blank">
-            <Image
-              width={144}
-              height={144}
-              src={nextLogo}
-              className="logo next"
-              alt="Next logo"
-            />
-          </a>
-        </span>
-        <span className="logos">
-          <a href="https://tauri.app" target="_blank">
-            <Image
-              width={144}
-              height={144}
-              src={tauriLogo}
-              className="logo tauri"
-              alt="Tauri logo"
-            />
-          </a>
-        </span>
-        <span className="logos">
-          <a href="https://reactjs.org" target="_blank">
-            <Image
-              width={144}
-              height={144}
-              src={reactLogo}
-              className="logo react"
-              alt="React logo"
-            />
-          </a>
-        </span>
-      </div>
-
-      <p>Click on the Tauri, Next, and React logos to learn more.</p>
-
-      <div className="row">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            greet();
-          }}
-        >
-          <input
-            id="greet-input"
-            onChange={(e) => setName(e.currentTarget.value)}
-            placeholder="Enter a name..."
-          />
-          <button type="submit">Greet</button>
-        </form>
-      </div>
-
-      <p>{greetMsg}</p>
+    <div>
+      <MDEditor
+        value={value}
+        onChange={setValue}
+        fullscreen={true}
+        preview={preview}
+        hideToolbar={hiddenToolbar}
+        // commands で欲しいコマンドを指定するとエラーになるため、フィルターで除外する
+        // なぜか list 系のコマンドは除外できない
+        commandsFilter={(cmd) => {
+          if (
+            /(bold|italic|title|link|quote|code|codeblock|image|divider|unorderedListCommand|orderedListCommand|checkedListCommand|fullscreen)/.test(
+              cmd.name
+            )
+          ) {
+            return false;
+          }
+          return cmd;
+        }}
+        onWheel={zoom.handleWheel}
+        onKeyDown={zoom.handleKeyDown}
+        className="w-md-editor-fullscreen" // 常にフルスクリーンにする
+      />
     </div>
   );
 }
