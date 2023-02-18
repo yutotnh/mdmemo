@@ -16,6 +16,11 @@
       "shell": {
         "all": false,
         "open": true
+      },
+      "window": {
+        "all": false,
+        "close": true,
+        "startDragging": true
       }
     },
     "bundle": {
@@ -63,7 +68,8 @@
         "height": 600,
         "resizable": true,
         "title": "mdmemo",
-        "width": 800
+        "width": 800,
+        "decorations": false
       }
     ]
   }
