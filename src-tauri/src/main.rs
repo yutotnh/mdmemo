@@ -15,7 +15,7 @@ fn zoom_window(window: tauri::Window, factor: f64) {
         {
             // see https://docs.rs/webkit2gtk/0.18.2/webkit2gtk/struct.WebView.html
             // and https://docs.rs/webkit2gtk/0.18.2/webkit2gtk/trait.WebViewExt.html
-            use webkit2gtk::traits::WebViewExt;
+            use webkit2gtk::auto::web_view::WebViewExt;
             webview.inner().set_zoom_level(factor);
         }
 
@@ -25,12 +25,13 @@ fn zoom_window(window: tauri::Window, factor: f64) {
             webview.controller().SetZoomFactor(factor).unwrap();
         }
 
-        #[cfg(target_os = "linux")]
-        {
-            // see https://docs.rs/webkit2gtk/0.18.2/webkit2gtk/struct.WebView.html
-            // and https://docs.rs/webkit2gtk/0.18.2/webkit2gtk/trait.WebViewExt.html
-            use webkit2gtk::auto::web_view::WebViewExt;
-            webview.inner().set_zoom_level(factor);
+        #[cfg(target_os = "macos")]
+        unsafe {
+            let () = msg_send![webview.inner(), setPageZoom: 4.];
+            let () = msg_send![webview.controller(), removeAllUserScripts];
+            let bg_color: cocoa::base::id =
+                msg_send![class!(NSColor), colorWithDeviceRed:0.5 green:0.2 blue:0.4 alpha:1.];
+            let () = msg_send![webview.ns_window(), setBackgroundColor: bg_color];
         }
     });
 }
