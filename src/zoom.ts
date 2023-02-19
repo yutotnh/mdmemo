@@ -1,29 +1,31 @@
+import { invoke } from "@tauri-apps/api/tauri";
+
 // ズームできる値のリスト(ブラウザのズームと同じ)
 const zoomOptions = [
-  25, 33, 50, 67, 75, 80, 90, 100, 110, 125, 150, 175, 200, 250, 300, 400, 500,
+  0.25, 0.33, 0.5, 0.67, 0.75, 0.8, 0.9, 1.0, 1.1, 1.25, 1.5, 1.75, 2.0, 2.5,
+  3.0, 4.0, 5.0,
 ];
 
-let zoomIndex = 7; // 100%
+let zoomIndex = 7; // 1.00
 
 /**
  * Ctrl + ホイールでフォントサイズを変更
  * @param e React.WheelEvent<HTMLDivElement>
  */
-async function handleWheel(e: React.WheelEvent<HTMLDivElement>) {
+export function handleWheel(e: React.WheelEvent<HTMLDivElement>) {
   if (e.ctrlKey) {
     // className='w-md-editor-content' の font-size を取得
     if (e.deltaY < 0) {
       if (zoomIndex < zoomOptions.length - 1) {
         zoomIndex += 1;
       }
-      console.log("up");
     } else {
       if (zoomIndex > 0) {
         zoomIndex -= 1;
       }
-      console.log("down");
     }
-    document.body.style.zoom = zoomOptions[zoomIndex] + "%";
+
+    invoke("zoom_window", { factor: zoomOptions[zoomIndex] });
   }
 }
 
@@ -31,7 +33,7 @@ async function handleWheel(e: React.WheelEvent<HTMLDivElement>) {
  * Ctrl + Plus/Minus でフォントサイズを変更
  * @param e React.KeyboardEvent<HTMLDivElement>
  */
-async function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+export function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
   if (e.ctrlKey) {
     if (e.key === "+") {
       if (zoomIndex < zoomOptions.length - 1) {
@@ -42,8 +44,7 @@ async function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
         zoomIndex -= 1;
       }
     }
-    document.body.style.zoom = zoomOptions[zoomIndex] + "%";
+
+    invoke("zoom_window", { factor: zoomOptions[zoomIndex] });
   }
 }
-
-export { handleWheel, handleKeyDown };
