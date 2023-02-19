@@ -27,11 +27,8 @@ fn zoom_window(window: tauri::Window, factor: f64) {
 
         #[cfg(target_os = "macos")]
         unsafe {
-            let () = msg_send![webview.inner(), setPageZoom: 4.];
-            let () = msg_send![webview.controller(), removeAllUserScripts];
-            let bg_color: cocoa::base::id =
-                msg_send![class!(NSColor), colorWithDeviceRed:0.5 green:0.2 blue:0.4 alpha:1.];
-            let () = msg_send![webview.ns_window(), setBackgroundColor: bg_color];
+            use objc::{msg_send, sel, sel_impl};
+            let () = msg_send![webview.inner(), setPageZoom: factor];
         }
     });
 }
