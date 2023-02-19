@@ -65,10 +65,10 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 600,
+        "height": 300,
         "resizable": true,
         "title": "mdmemo",
-        "width": 800,
+        "width": 400,
         "decorations": false
       }
     ]

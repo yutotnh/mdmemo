@@ -13,7 +13,7 @@ const MDEditor = dynamic<MDEditorProps>(() => import("@uiw/react-md-editor"), {
 const closeWindow = {
   name: "close-window",
   keyCommand: "closeWindow",
-  buttonProps: { "aria-label": "Close window" },
+  buttonProps: { "aria-label": "Close window", title: "Close window" },
   icon: <span id="titlebar-close">✕</span>,
   execute: () => {
     if (process.browser) {
@@ -23,7 +23,7 @@ const closeWindow = {
 };
 
 function App() {
-  const [value, setValue] = useState("**Hello world!!!**");
+  const [value, setValue] = useState("");
   const [preview, setPreview] = useState<PreviewType>("edit");
   const [hiddenToolbar, setHiddenToolbar] = useState(false);
 
