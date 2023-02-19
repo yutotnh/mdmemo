@@ -12,7 +12,7 @@ let zoomIndex = 7; // 1.00
  * Ctrl + ホイールでフォントサイズを変更
  * @param e React.WheelEvent<HTMLDivElement>
  */
-async function handleWheel(e: React.WheelEvent<HTMLDivElement>) {
+export function handleWheel(e: React.WheelEvent<HTMLDivElement>) {
   if (e.ctrlKey) {
     // className='w-md-editor-content' の font-size を取得
     if (e.deltaY < 0) {
@@ -33,7 +33,7 @@ async function handleWheel(e: React.WheelEvent<HTMLDivElement>) {
  * Ctrl + Plus/Minus でフォントサイズを変更
  * @param e React.KeyboardEvent<HTMLDivElement>
  */
-async function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+export function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
   if (e.ctrlKey) {
     if (e.key === "+") {
       if (zoomIndex < zoomOptions.length - 1) {
@@ -48,5 +48,3 @@ async function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
     invoke("zoom_window", { factor: zoomOptions[zoomIndex] });
   }
 }
-
-export { handleWheel, handleKeyDown };

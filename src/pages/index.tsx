@@ -5,7 +5,7 @@ import * as commands from "@uiw/react-md-editor/lib/commands";
 import "@uiw/react-md-editor/markdown-editor.css";
 import dynamic from "next/dynamic";
 import { useState } from "react";
-import * as zoom from "./zoom";
+import * as zoom from "../zoom";
 const MDEditor = dynamic<MDEditorProps>(() => import("@uiw/react-md-editor"), {
   ssr: false,
 });
