@@ -29,7 +29,7 @@ fn zoom_window(window: tauri::Window, factor: f64) {
         {
             // see https://docs.rs/webkit2gtk/0.18.2/webkit2gtk/struct.WebView.html
             // and https://docs.rs/webkit2gtk/0.18.2/webkit2gtk/trait.WebViewExt.html
-            use webkit2gtk::traits::WebViewExt;
+            use webkit2gtk::auto::web_view::WebViewExt;
             webview.inner().set_zoom_level(factor);
         }
     });
