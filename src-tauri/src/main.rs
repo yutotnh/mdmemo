@@ -3,6 +3,12 @@
     windows_subsystem = "windows"
 )]
 
+use std::{
+    io::{Read, Write},
+    sync::Mutex,
+};
+use tauri::State;
+
 #[tauri::command]
 fn close_window(window: tauri::Window) {
     window.close().unwrap();
@@ -33,9 +39,62 @@ fn zoom_window(window: tauri::Window, factor: f64) {
     });
 }
 
+struct Path(Mutex<String>);
+
+#[tauri::command]
+fn openfile(path: String, state_path: State<Path>) -> String {
+    let mut file_path = state_path.0.lock().unwrap();
+
+    *file_path = path.clone();
+
+    let mut file = std::fs::File::open(path).unwrap();
+    let mut contents = String::new();
+    file.read_to_string(&mut contents).unwrap();
+    contents
+}
+
+#[tauri::command]
+fn savefile(path: String, content: String, state_path: State<Path>) {
+    let mut file_path = state_path.0.lock().unwrap();
+    *file_path = path.clone();
+
+    let mut file = std::fs::File::create(path).unwrap();
+    file.write_all(content.as_bytes()).unwrap();
+}
+
+#[tauri::command]
+fn getfile(path: State<Path>) -> String {
+    if path.0.lock().unwrap().as_str().is_empty() {
+        return "".to_string();
+    }
+
+    let mut file = std::fs::File::open(path.0.lock().unwrap().as_str()).unwrap();
+    let mut contents = String::new();
+    file.read_to_string(&mut contents).unwrap();
+    contents
+}
+
+#[tauri::command]
+fn overwritefile(path: State<Path>, content: String) {
+    if path.0.lock().unwrap().as_str().is_empty() {
+        return;
+    }
+
+    let mut file = std::fs::File::create(path.0.lock().unwrap().as_str()).unwrap();
+    file.write_all(content.as_bytes()).unwrap();
+}
+
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![close_window, zoom_window])
+        .invoke_handler(tauri::generate_handler![
+            close_window,
+            zoom_window,
+            openfile,
+            savefile,
+            overwritefile,
+            getfile
+        ])
+        .manage(Path(Mutex::new(String::new())))
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
