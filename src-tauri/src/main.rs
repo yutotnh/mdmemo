@@ -4,6 +4,7 @@
 )]
 
 use std::{
+    fs,
     io::{Read, Write},
     sync::Mutex,
 };
@@ -39,49 +40,65 @@ fn zoom_window(window: tauri::Window, factor: f64) {
     });
 }
 
-struct Path(Mutex<String>);
+struct File(Mutex<String>);
 
-#[tauri::command]
-fn openfile(path: String, state_path: State<Path>) -> String {
-    let mut file_path = state_path.0.lock().unwrap();
-
-    *file_path = path.clone();
-
-    let mut file = std::fs::File::open(path).unwrap();
-    let mut contents = String::new();
-    file.read_to_string(&mut contents).unwrap();
-    contents
+trait FileReadWrite {
+    fn set_path(&self, path: String);
+    fn read(&self) -> String;
+    fn write(&self, content: String);
 }
 
-#[tauri::command]
-fn savefile(path: String, content: String, state_path: State<Path>) {
-    let mut file_path = state_path.0.lock().unwrap();
-    *file_path = path.clone();
-
-    let mut file = std::fs::File::create(path).unwrap();
-    file.write_all(content.as_bytes()).unwrap();
-}
-
-#[tauri::command]
-fn getfile(path: State<Path>) -> String {
-    if path.0.lock().unwrap().as_str().is_empty() {
-        return "".to_string();
+impl FileReadWrite for File {
+    fn set_path(&self, path: String) {
+        let mut file_path = self.0.lock().unwrap();
+        *file_path = path;
     }
 
-    let mut file = std::fs::File::open(path.0.lock().unwrap().as_str()).unwrap();
-    let mut contents = String::new();
-    file.read_to_string(&mut contents).unwrap();
-    contents
+    fn read(&self) -> String {
+        let file_path = self.0.lock().unwrap();
+        if file_path.is_empty() {
+            return "".to_string();
+        }
+
+        let mut file = fs::File::open(file_path.as_str()).unwrap();
+        let mut contents = String::new();
+        file.read_to_string(&mut contents).unwrap();
+        contents
+    }
+
+    fn write(&self, content: String) {
+        let file_path = self.0.lock().unwrap();
+        if file_path.is_empty() {
+            return;
+        }
+
+        let mut file = fs::File::create(file_path.as_str()).unwrap();
+        file.write_all(content.as_bytes()).unwrap();
+    }
 }
 
 #[tauri::command]
-fn overwritefile(path: State<Path>, content: String) {
-    if path.0.lock().unwrap().as_str().is_empty() {
-        return;
-    }
+fn open_file(path: String, file_path: State<File>) -> String {
+    file_path.set_path(path);
 
-    let mut file = std::fs::File::create(path.0.lock().unwrap().as_str()).unwrap();
-    file.write_all(content.as_bytes()).unwrap();
+    file_path.read()
+}
+
+#[tauri::command]
+fn save_file(path: String, content: String, file_path: State<File>) {
+    file_path.set_path(path);
+
+    file_path.write(content);
+}
+
+#[tauri::command]
+fn get_file(file_path: State<File>) -> String {
+    file_path.read()
+}
+
+#[tauri::command]
+fn overwrite_file(file_path: State<File>, content: String) {
+    file_path.write(content);
 }
 
 fn main() {
@@ -89,12 +106,12 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             close_window,
             zoom_window,
-            openfile,
-            savefile,
-            overwritefile,
-            getfile
+            open_file,
+            save_file,
+            overwrite_file,
+            get_file
         ])
-        .manage(Path(Mutex::new(String::new())))
+        .manage(File(Mutex::new(String::new())))
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

@@ -44,7 +44,7 @@ function App() {
         multiple: false,
         directory: false,
       }).then((path) =>
-        invoke("openfile", { path: path }).then((file) =>
+        invoke("open_file", { path: path }).then((file) =>
           setContent(file as string)
         )
       );
@@ -58,7 +58,7 @@ function App() {
     icon: <span id="titlebar-file">save</span>,
     execute: () => {
       save().then((path) => {
-        invoke("savefile", { path: path, content: content });
+        invoke("save_file", { path: path, content: content });
         console.log(path);
       });
     },
@@ -89,7 +89,7 @@ function App() {
   useEffect(() => {
     if (process.browser) {
       // リロード時にファイルを読み込む
-      invoke("getfile").then((file) => setContent(file as string));
+      invoke("get_file").then((file) => setContent(file as string));
     }
   }, []);
 
