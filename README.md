@@ -21,11 +21,11 @@ Markdown対応の小さなメモ帳
 
 - 編集モード
 
-    <img src="documents/edit.png" alt="Edit image" width="250">
+    <img src="documents/edit.png" alt="Edit image" width="400">
 
 - プレビューモード
 
-    <img src="documents/preview.png" alt="Preview image" width="250">
+    <img src="documents/preview.png" alt="Preview image" width="400">
 
 ## Development
 
