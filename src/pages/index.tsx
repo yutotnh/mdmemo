@@ -94,6 +94,7 @@ function App() {
     execute: (state: commands.ExecuteState, api: commands.TextAreaTextApi) => {
       const formatted = remark().processSync(state.text).toString();
       setContent(formatted);
+      overwrite(formatted);
     },
   };
 
@@ -168,3 +169,6 @@ function App() {
 }
 
 export default App;
+function selectWord(arg0: { text: string; selection: commands.TextRange }) {
+  throw new Error("Function not implemented.");
+}
