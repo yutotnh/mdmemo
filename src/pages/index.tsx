@@ -30,7 +30,7 @@ function App() {
   const [hiddenToolbar, setHiddenToolbar] = useState(false);
 
   function overwrite(content: string) {
-    invoke("overwritefile", { content: content });
+    invoke("overwrite_file", { content: content });
     setContent(content);
   }
 
