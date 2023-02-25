@@ -1,11 +1,13 @@
+import { open, save } from "@tauri-apps/api/dialog";
 import { invoke } from "@tauri-apps/api/tauri";
 import "@uiw/react-markdown-preview/markdown.css";
 import { MDEditorProps, PreviewType } from "@uiw/react-md-editor";
 import * as commands from "@uiw/react-md-editor/lib/commands";
 import "@uiw/react-md-editor/markdown-editor.css";
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import * as zoom from "../zoom";
+
 const MDEditor = dynamic<MDEditorProps>(() => import("@uiw/react-md-editor"), {
   ssr: false,
 });
@@ -23,9 +25,44 @@ const closeWindow = {
 };
 
 function App() {
-  const [value, setValue] = useState("");
+  const [content, setContent] = useState<string>("");
   const [preview, setPreview] = useState<PreviewType>("edit");
   const [hiddenToolbar, setHiddenToolbar] = useState(false);
+
+  function overwrite(content: string) {
+    invoke("overwrite_file", { content: content });
+    setContent(content);
+  }
+
+  const openfile = {
+    name: "openfile",
+    keyCommand: "openfile",
+    buttonProps: { "aria-label": "File", title: "File" },
+    icon: <span id="titlebar-file">open</span>,
+    execute: () => {
+      open({
+        multiple: false,
+        directory: false,
+      }).then((path) =>
+        invoke("open_file", { path: path }).then((file) =>
+          setContent(file as string)
+        )
+      );
+    },
+  };
+
+  const savefile = {
+    name: "savefile",
+    keyCommand: "savefile",
+    buttonProps: { "aria-label": "File", title: "File" },
+    icon: <span id="titlebar-file">save</span>,
+    execute: () => {
+      save().then((path) => {
+        invoke("save_file", { path: path, content: content });
+        console.log(path);
+      });
+    },
+  };
 
   if (process.browser) {
     window.onblur = () => {
@@ -49,15 +86,35 @@ function App() {
     });
   }
 
+  useEffect(() => {
+    if (process.browser) {
+      // リロード時にファイルを読み込む
+      invoke("get_file").then((file) => setContent(file as string));
+    }
+  }, []);
+
   return (
     <div className="container">
       <MDEditor
-        value={value}
-        onChange={setValue}
+        value={content}
+        onChange={(content) => overwrite(content)}
         fullscreen={true}
         preview={preview}
         hideToolbar={hiddenToolbar}
-        commands={[commands.comment, commands.strikethrough, commands.hr]}
+        commands={[
+          commands.group([openfile, savefile], {
+            name: "file",
+            groupName: "file",
+            icon: <span id="titlebar-title">📂</span>,
+            buttonProps: {
+              "aria-label": "File",
+              title: "File",
+            },
+          }),
+          commands.comment,
+          commands.strikethrough,
+          commands.hr,
+        ]}
         extraCommands={[
           commands.codeLive,
           commands.codeEdit,
