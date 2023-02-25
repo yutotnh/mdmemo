@@ -15,33 +15,17 @@ Markdown対応の小さなメモ帳
 
 ## 画面
 
-編集画面とプレビュー画面が存在します
+編集モードとプレビューモードが存在します
 
-ウィンドウがアクティブウィンドウの場合に編集画面になり、非アクティブウィンドウの時にプレビュー画面になります
+ウィンドウがアクティブウィンドウの場合に編集モードになり、非アクティブウィンドウの時にプレビューモードになります
 
-<style>
-  .container {
-    display: flex;
-    flex-wrap: wrap;
-  }
+- 編集モード
 
-  .item {
-    width: 350px;
-    margin: 10px;
-    text-align: center;
-  }
-</style>
+    <img src="documents/edit.png" alt="Edit image" width="250">
 
-<div class="container">
-  <div class="item">
-    <p>編集画面</p>
-    <img src="documents/edit.png" alt="Edit">
-  </div>
-  <div class="item">
-    <p>プレビュー画面</p>
-    <img src="documents/preview.png" alt="Preview">
-  </div>
-</div>
+- プレビューモード
+
+    <img src="documents/preview.png" alt="Preview image" width="250">
 
 ## Development
 
