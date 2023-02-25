@@ -47,6 +47,10 @@ function App() {
       open({
         multiple: false,
         directory: false,
+        filters: [
+          { name: "Markdown", extensions: ["md"] },
+          { name: "All", extensions: ["*"] },
+        ],
       }).then((path) => {
         if (path == null) return;
 
@@ -67,7 +71,12 @@ function App() {
     },
     icon: <span id="titlebar-file">Save File</span>,
     execute: (state) => {
-      save().then((path) => {
+      save({
+        filters: [
+          { name: "Markdown", extensions: ["md"] },
+          { name: "All", extensions: ["*"] },
+        ],
+      }).then((path) => {
         if (path == null) return;
 
         invoke("create_file", { path: path });
