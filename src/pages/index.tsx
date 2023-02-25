@@ -7,6 +7,7 @@ import "@uiw/react-md-editor/markdown-editor.css";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import * as zoom from "../zoom";
+import { remark } from "remark";
 
 const MDEditor = dynamic<MDEditorProps>(() => import("@uiw/react-md-editor"), {
   ssr: false,
@@ -78,10 +79,21 @@ function App() {
         ],
       }).then((path) => {
         if (path == null) return;
-
         invoke("create_file", { path: path });
-        invoke("overwrite_file", { content: content });
+        invoke("overwrite_file", { content: state.text });
       });
+    },
+  };
+
+  const format = {
+    name: "format",
+    keyCommand: "format",
+    shortcuts: "alt+shift+f",
+    buttonProps: { "aria-label": "Format", title: "Format" },
+    icon: <span id="titlebar-format">Format</span>,
+    execute: (state: commands.ExecuteState, api: commands.TextAreaTextApi) => {
+      const formatted = remark().processSync(state.text).toString();
+      setContent(formatted);
     },
   };
 
@@ -139,6 +151,7 @@ function App() {
           commands.comment,
           commands.strikethrough,
           commands.hr,
+          format,
         ]}
         extraCommands={[
           commands.codeLive,
