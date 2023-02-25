@@ -37,29 +37,41 @@ function App() {
   const openfile = {
     name: "openfile",
     keyCommand: "openfile",
-    buttonProps: { "aria-label": "File", title: "File" },
-    icon: <span id="titlebar-file">open</span>,
+    shortcuts: "ctrlcmd+o",
+    buttonProps: {
+      "aria-label": "Open File (Ctrl+O)",
+      title: "Open File (Ctrl+O)",
+    },
+    icon: <span id="titlebar-file-open">Open File</span>,
     execute: () => {
       open({
         multiple: false,
         directory: false,
-      }).then((path) =>
+      }).then((path) => {
+        if (path == null) return;
+
         invoke("open_file", { path: path }).then((file) =>
           setContent(file as string)
-        )
-      );
+        );
+      });
     },
   };
 
   const savefile = {
     name: "savefile",
     keyCommand: "savefile",
-    buttonProps: { "aria-label": "File", title: "File" },
-    icon: <span id="titlebar-file">save</span>,
-    execute: () => {
+    shortcuts: "ctrlcmd+shift+s",
+    buttonProps: {
+      "aria-label": "Save File (Ctrl+Shift+S)",
+      title: "Save File (Ctrl+Shift+S)",
+    },
+    icon: <span id="titlebar-file">Save File</span>,
+    execute: (state) => {
       save().then((path) => {
-        invoke("save_file", { path: path, content: content });
-        console.log(path);
+        if (path == null) return;
+
+        invoke("create_file", { path: path });
+        invoke("overwrite_file", { content: content });
       });
     },
   };
@@ -105,7 +117,11 @@ function App() {
           commands.group([openfile, savefile], {
             name: "file",
             groupName: "file",
-            icon: <span id="titlebar-title">📂</span>,
+            icon: (
+              <span id="titlebar-title" style={{ filter: "grayscale(100%)" }}>
+                📂
+              </span>
+            ),
             buttonProps: {
               "aria-label": "File",
               title: "File",

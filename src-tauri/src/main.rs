@@ -85,10 +85,8 @@ fn open_file(path: String, file_path: State<File>) -> String {
 }
 
 #[tauri::command]
-fn save_file(path: String, content: String, file_path: State<File>) {
+fn create_file(path: String, file_path: State<File>) {
     file_path.set_path(path);
-
-    file_path.write(content);
 }
 
 #[tauri::command]
@@ -107,7 +105,7 @@ fn main() {
             close_window,
             zoom_window,
             open_file,
-            save_file,
+            create_file,
             overwrite_file,
             get_file
         ])
