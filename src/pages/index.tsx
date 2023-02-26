@@ -25,6 +25,8 @@ const closeWindow = {
   },
 };
 
+let isFixedPreview: boolean = false;
+
 function App() {
   const [content, setContent] = useState<string>("");
   const [preview, setPreview] = useState<PreviewType>("edit");
@@ -44,7 +46,8 @@ function App() {
       title: "Open File (Ctrl+O)",
     },
     icon: <span id="titlebar-file-open">Open File</span>,
-    execute: () => {
+    execute: (state: commands.ExecuteState, api: commands.TextAreaTextApi) => {
+      isFixedPreview = true;
       open({
         multiple: false,
         directory: false,
@@ -52,12 +55,18 @@ function App() {
           { name: "Markdown", extensions: ["md"] },
           { name: "All", extensions: ["*"] },
         ],
-      }).then((path) => {
-        if (path == null) return;
+      }).then((path: string) => {
+        if (path == null) {
+          isFixedPreview = false;
+          return;
+        }
 
-        invoke("open_file", { path: path }).then((file) =>
-          setContent(file as string)
-        );
+        invoke("open_file", { path: path }).then((file: string) => {
+          api.setSelectionRange({ start: 0, end: state.text.length });
+          api.replaceSelection(file);
+          api.setSelectionRange({ start: 0, end: 0 });
+          isFixedPreview = false;
+        });
       });
     },
   };
@@ -71,13 +80,13 @@ function App() {
       title: "Save File (Ctrl+Shift+S)",
     },
     icon: <span id="titlebar-file">Save File</span>,
-    execute: (state) => {
+    execute: (state: commands.ExecuteState) => {
       save({
         filters: [
           { name: "Markdown", extensions: ["md"] },
           { name: "All", extensions: ["*"] },
         ],
-      }).then((path) => {
+      }).then((path: string) => {
         if (path == null) return;
         invoke("create_file", { path: path });
         invoke("overwrite_file", { content: state.text });
@@ -120,10 +129,14 @@ function App() {
 
   if (process.browser) {
     window.onblur = () => {
+      if (isFixedPreview) return;
+
       setPreview("preview");
     };
 
     window.onfocus = () => {
+      if (isFixedPreview) return;
+
       setPreview("edit");
     };
 
