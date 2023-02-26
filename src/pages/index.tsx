@@ -6,8 +6,8 @@ import * as commands from "@uiw/react-md-editor/lib/commands";
 import "@uiw/react-md-editor/markdown-editor.css";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import * as zoom from "../zoom";
 import { remark } from "remark";
+import * as zoom from "../zoom";
 
 const MDEditor = dynamic<MDEditorProps>(() => import("@uiw/react-md-editor"), {
   ssr: false,
@@ -92,9 +92,26 @@ function App() {
     buttonProps: { "aria-label": "Format", title: "Format" },
     icon: <span id="titlebar-format">Format</span>,
     execute: (state: commands.ExecuteState, api: commands.TextAreaTextApi) => {
+      // フォーマット前後でカーソル位置を保持するために、
+      // フォーマット前のテキストのカーソル位置にマークをつける
+      api.setSelectionRange({
+        start: state.selection.end,
+        end: state.selection.end,
+      });
+      let mark = "<!-- CURSOR_POSITION -->";
+      let text =
+        state.text.slice(0, state.selection.end) +
+        mark +
+        state.text.slice(state.selection.end);
+
+      // フォーマット前に基づくフォーマット後のカーソル位置を取得
+      let cursor = remark().processSync(text).toString().indexOf(mark);
+
       const formatted = remark().processSync(state.text).toString();
-      setContent(formatted);
-      overwrite(formatted);
+      api.setSelectionRange({ start: 0, end: state.text.length });
+      api.replaceSelection(formatted);
+
+      api.setSelectionRange({ start: cursor, end: cursor });
     },
   };
 
@@ -169,6 +186,3 @@ function App() {
 }
 
 export default App;
-function selectWord(arg0: { text: string; selection: commands.TextRange }) {
-  throw new Error("Function not implemented.");
-}
