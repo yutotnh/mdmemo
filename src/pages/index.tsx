@@ -89,7 +89,10 @@ function App() {
     name: "format",
     keyCommand: "format",
     shortcuts: "alt+shift+f",
-    buttonProps: { "aria-label": "Format", title: "Format" },
+    buttonProps: {
+      "aria-label": "Format File (Alt+Shift+F)",
+      title: "Format (Alt+Shift+F)",
+    },
     icon: <span id="titlebar-format">Format</span>,
     execute: (state: commands.ExecuteState, api: commands.TextAreaTextApi) => {
       // フォーマット前後でカーソル位置を保持するために、
@@ -166,10 +169,22 @@ function App() {
               title: "File",
             },
           }),
-          commands.comment,
-          commands.strikethrough,
-          commands.hr,
-          format,
+          commands.group(
+            [commands.comment, commands.strikethrough, commands.hr, format],
+            {
+              name: "edit",
+              groupName: "edit",
+              icon: (
+                <span id="titlebar-edit" style={{ filter: "grayscale(100%)" }}>
+                  📝
+                </span>
+              ),
+              buttonProps: {
+                "aria-label": "Edit",
+                title: "Edit",
+              },
+            }
+          ),
         ]}
         extraCommands={[
           commands.codeLive,
