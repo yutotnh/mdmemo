@@ -25,6 +25,98 @@ const closeWindow = {
   },
 };
 
+let isFixedPreview: boolean = false;
+
+const openfile = {
+  name: "openfile",
+  keyCommand: "openfile",
+  shortcuts: "ctrlcmd+o",
+  buttonProps: {
+    "aria-label": "Open File (Ctrl+O)",
+    title: "Open File (Ctrl+O)",
+  },
+  icon: <span id="titlebar-file-open">Open File</span>,
+  execute: (state: commands.ExecuteState, api: commands.TextAreaTextApi) => {
+    isFixedPreview = true;
+    open({
+      multiple: false,
+      directory: false,
+      filters: [
+        { name: "Markdown", extensions: ["md"] },
+        { name: "All", extensions: ["*"] },
+      ],
+    }).then((path: string) => {
+      if (path == null) {
+        isFixedPreview = false;
+        return;
+      }
+
+      invoke("open_file", { path: path }).then((file: string) => {
+        api.setSelectionRange({ start: 0, end: state.text.length });
+        api.replaceSelection(file);
+        api.setSelectionRange({ start: 0, end: 0 });
+        isFixedPreview = false;
+      });
+    });
+  },
+};
+
+const savefile = {
+  name: "savefile",
+  keyCommand: "savefile",
+  shortcuts: "ctrlcmd+shift+s",
+  buttonProps: {
+    "aria-label": "Save File (Ctrl+Shift+S)",
+    title: "Save File (Ctrl+Shift+S)",
+  },
+  icon: <span id="titlebar-file">Save File</span>,
+  execute: (state: commands.ExecuteState) => {
+    save({
+      filters: [
+        { name: "Markdown", extensions: ["md"] },
+        { name: "All", extensions: ["*"] },
+      ],
+    }).then((path: string) => {
+      if (path == null) return;
+      invoke("create_file", { path: path });
+      invoke("overwrite_file", { content: state.text });
+    });
+  },
+};
+
+const format = {
+  name: "format",
+  keyCommand: "format",
+  shortcuts: "alt+shift+f",
+  buttonProps: {
+    "aria-label": "Format File (Alt+Shift+F)",
+    title: "Format (Alt+Shift+F)",
+  },
+  icon: <span id="titlebar-format">Format</span>,
+  execute: (state: commands.ExecuteState, api: commands.TextAreaTextApi) => {
+    // フォーマット前後でカーソル位置を保持するために、
+    // フォーマット前のテキストのカーソル位置にマークをつける
+    api.setSelectionRange({
+      start: state.selection.end,
+      end: state.selection.end,
+    });
+    let mark = "<!-- CURSOR_POSITION -->";
+    let text =
+      state.text.slice(0, state.selection.end) +
+      mark +
+      state.text.slice(state.selection.end);
+
+    // フォーマット前に基づくフォーマット後のカーソル位置を取得
+    let cursor = remark().processSync(text).toString().indexOf(mark);
+
+    const formatted = remark().processSync(state.text).toString();
+    api.setSelectionRange({ start: 0, end: state.text.length });
+    api.replaceSelection(formatted);
+
+    api.setSelectionRange({ start: cursor, end: cursor });
+  },
+};
+
 function App() {
   const [content, setContent] = useState<string>("");
   const [preview, setPreview] = useState<PreviewType>("edit");
@@ -35,95 +127,16 @@ function App() {
     setContent(content);
   }
 
-  const openfile = {
-    name: "openfile",
-    keyCommand: "openfile",
-    shortcuts: "ctrlcmd+o",
-    buttonProps: {
-      "aria-label": "Open File (Ctrl+O)",
-      title: "Open File (Ctrl+O)",
-    },
-    icon: <span id="titlebar-file-open">Open File</span>,
-    execute: () => {
-      open({
-        multiple: false,
-        directory: false,
-        filters: [
-          { name: "Markdown", extensions: ["md"] },
-          { name: "All", extensions: ["*"] },
-        ],
-      }).then((path) => {
-        if (path == null) return;
-
-        invoke("open_file", { path: path }).then((file) =>
-          setContent(file as string)
-        );
-      });
-    },
-  };
-
-  const savefile = {
-    name: "savefile",
-    keyCommand: "savefile",
-    shortcuts: "ctrlcmd+shift+s",
-    buttonProps: {
-      "aria-label": "Save File (Ctrl+Shift+S)",
-      title: "Save File (Ctrl+Shift+S)",
-    },
-    icon: <span id="titlebar-file">Save File</span>,
-    execute: (state) => {
-      save({
-        filters: [
-          { name: "Markdown", extensions: ["md"] },
-          { name: "All", extensions: ["*"] },
-        ],
-      }).then((path) => {
-        if (path == null) return;
-        invoke("create_file", { path: path });
-        invoke("overwrite_file", { content: state.text });
-      });
-    },
-  };
-
-  const format = {
-    name: "format",
-    keyCommand: "format",
-    shortcuts: "alt+shift+f",
-    buttonProps: {
-      "aria-label": "Format File (Alt+Shift+F)",
-      title: "Format (Alt+Shift+F)",
-    },
-    icon: <span id="titlebar-format">Format</span>,
-    execute: (state: commands.ExecuteState, api: commands.TextAreaTextApi) => {
-      // フォーマット前後でカーソル位置を保持するために、
-      // フォーマット前のテキストのカーソル位置にマークをつける
-      api.setSelectionRange({
-        start: state.selection.end,
-        end: state.selection.end,
-      });
-      let mark = "<!-- CURSOR_POSITION -->";
-      let text =
-        state.text.slice(0, state.selection.end) +
-        mark +
-        state.text.slice(state.selection.end);
-
-      // フォーマット前に基づくフォーマット後のカーソル位置を取得
-      let cursor = remark().processSync(text).toString().indexOf(mark);
-
-      const formatted = remark().processSync(state.text).toString();
-      api.setSelectionRange({ start: 0, end: state.text.length });
-      api.replaceSelection(formatted);
-
-      api.setSelectionRange({ start: cursor, end: cursor });
-    },
-  };
-
   if (process.browser) {
     window.onblur = () => {
+      if (isFixedPreview) return;
+
       setPreview("preview");
     };
 
     window.onfocus = () => {
+      if (isFixedPreview) return;
+
       setPreview("edit");
     };
 
