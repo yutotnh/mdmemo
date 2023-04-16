@@ -4,7 +4,6 @@
 )]
 
 use std::{
-    fs,
     io::{Read, Seek, Write},
     sync::Mutex,
 };
