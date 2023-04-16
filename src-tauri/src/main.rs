@@ -5,7 +5,7 @@
 
 use std::{
     fs,
-    io::{Read, Write},
+    io::{Read, Seek, Write},
     sync::Mutex,
 };
 use tauri::State;
@@ -40,63 +40,62 @@ fn zoom_window(window: tauri::Window, factor: f64) {
     });
 }
 
-struct File(Mutex<String>);
+struct File(Mutex<std::fs::File>);
 
 trait FileReadWrite {
-    fn set_path(&self, path: String);
+    fn open(&self, path: String);
     fn read(&self) -> String;
     fn write(&self, content: String);
 }
 
 impl FileReadWrite for File {
-    fn set_path(&self, path: String) {
-        let mut file_path = self.0.lock().unwrap();
-        *file_path = path;
+    fn open(&self, path: String) {
+        let mut file = self.0.lock().unwrap();
+        *file = std::fs::OpenOptions::new()
+            .create(true)
+            .read(true)
+            .write(true)
+            .open(path)
+            .unwrap();
     }
 
     fn read(&self) -> String {
-        let file_path = self.0.lock().unwrap();
-        if file_path.is_empty() {
-            return "".to_string();
-        }
+        let mut file = self.0.lock().unwrap();
 
-        let mut file = fs::File::open(file_path.as_str()).unwrap();
         let mut contents = String::new();
+        file.rewind().unwrap();
         file.read_to_string(&mut contents).unwrap();
         contents
     }
 
     fn write(&self, content: String) {
-        let file_path = self.0.lock().unwrap();
-        if file_path.is_empty() {
-            return;
-        }
-
-        let mut file = fs::File::create(file_path.as_str()).unwrap();
+        let mut file = self.0.lock().unwrap();
+        file.set_len(0).unwrap();
+        file.rewind().unwrap();
         file.write_all(content.as_bytes()).unwrap();
     }
 }
 
 #[tauri::command]
-fn open_file(path: String, file_path: State<File>) -> String {
-    file_path.set_path(path);
+fn open_file(path: String, file: State<File>) -> String {
+    file.open(path);
 
-    file_path.read()
+    file.read()
 }
 
 #[tauri::command]
-fn create_file(path: String, file_path: State<File>) {
-    file_path.set_path(path);
+fn create_file(path: String, file: State<File>) {
+    file.open(path);
 }
 
 #[tauri::command]
-fn get_file(file_path: State<File>) -> String {
-    file_path.read()
+fn get_file(file: State<File>) -> String {
+    file.read()
 }
 
 #[tauri::command]
-fn overwrite_file(file_path: State<File>, content: String) {
-    file_path.write(content);
+fn overwrite_file(content: String, file: State<File>) {
+    file.write(content);
 }
 
 fn main() {
@@ -109,7 +108,7 @@ fn main() {
             overwrite_file,
             get_file
         ])
-        .manage(File(Mutex::new(String::new())))
+        .manage(File(Mutex::new(tempfile::tempfile().unwrap())))
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
