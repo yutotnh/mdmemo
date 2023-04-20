@@ -51,9 +51,9 @@ const openfile = {
         return;
       }
 
-      invoke("open_file", { path: path }).then((file: string) => {
+      invoke("open_file", { path: path }).then((contents: string) => {
         api.setSelectionRange({ start: 0, end: state.text.length });
-        api.replaceSelection(file);
+        api.replaceSelection(contents);
         api.setSelectionRange({ start: 0, end: 0 });
         isFixedPreview = false;
       });
@@ -79,7 +79,7 @@ const savefile = {
     }).then((path: string) => {
       if (path == null) return;
       invoke("create_file", { path: path });
-      invoke("overwrite_file", { content: state.text });
+      invoke("overwrite_file", { contents: state.text });
     });
   },
 };
@@ -118,13 +118,13 @@ const format = {
 };
 
 function App() {
-  const [content, setContent] = useState<string>("");
+  const [contents, setContents] = useState<string>("");
   const [preview, setPreview] = useState<PreviewType>("edit");
   const [hiddenToolbar, setHiddenToolbar] = useState(false);
 
-  function overwrite(content: string) {
-    invoke("overwrite_file", { content: content });
-    setContent(content);
+  function overwrite(contents: string) {
+    invoke("overwrite_file", { contents: contents });
+    setContents(contents);
   }
 
   if (process.browser) {
@@ -156,15 +156,15 @@ function App() {
   useEffect(() => {
     if (process.browser) {
       // リロード時にファイルを読み込む
-      invoke("get_file").then((file) => setContent(file as string));
+      invoke("get_file").then((file) => setContents(file as string));
     }
   }, []);
 
   return (
     <div className="container">
       <MDEditor
-        value={content}
-        onChange={(content) => overwrite(content)}
+        value={contents}
+        onChange={(contents) => overwrite(contents)}
         fullscreen={true}
         preview={preview}
         hideToolbar={hiddenToolbar}
