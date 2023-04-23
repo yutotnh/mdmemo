@@ -143,8 +143,12 @@ function App() {
   const [hiddenToolbar, setHiddenToolbar] = useState(false);
 
   function overwrite(contents: string) {
-    invoke("overwrite_file", { contents: contents });
-    setContents(contents);
+    // 既存のファイルの中身と同じときは、ファイルを上書きしない
+    invoke("get_file").then((file) => {
+      if (file === contents) return;
+      invoke("overwrite_file", { contents: contents });
+      setContents(contents);
+    });
   }
 
   if (process.browser) {
