@@ -19,3 +19,8 @@
 .titlebar-button:hover {
   background: #5bbec3;
 }
+
+/* 小さいメモ帳を目指していて余分な空白を消したいのでmarginは0にする */
+.wmde-markdown * {
+  margin: 0px !important;
+}
