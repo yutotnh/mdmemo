@@ -53,10 +53,10 @@ trait FileReadWrite {
     fn path(&self, path: String);
 
     /// Reads the file
-    fn read(&self) -> String;
+    fn read(&self) -> Result<String, std::io::Error>;
 
     /// Writes to the file
-    fn write(&self, content: String);
+    fn write(&self, content: String) -> Result<(), std::io::Error>;
 }
 
 impl FileReadWrite for File {
@@ -64,28 +64,39 @@ impl FileReadWrite for File {
         *self.path.lock().unwrap() = path;
     }
 
-    fn read(&self) -> String {
+    fn read(&self) -> Result<String, std::io::Error> {
         let file_path = self.path.lock().unwrap();
 
         if file_path.is_empty() {
-            return self.contents.lock().unwrap().clone();
+            return Ok(self.contents.lock().unwrap().clone());
         }
 
         let mut file = std::fs::File::open(file_path.as_str()).unwrap();
         let mut contents = String::new();
-        file.read_to_string(&mut contents).unwrap();
-        contents
+        match file.read_to_string(&mut contents) {
+            Ok(_) => Ok(contents),
+            Err(e) => Err(e),
+        }
     }
 
-    fn write(&self, contents: String) {
+    fn write(&self, contents: String) -> Result<(), std::io::Error> {
         let file_path = self.path.lock().unwrap();
 
         *self.contents.lock().unwrap() = contents.clone();
 
         if !file_path.is_empty() {
-            let mut file = std::fs::File::create(file_path.as_str()).unwrap();
-            file.write_all(contents.as_bytes()).unwrap();
+            let mut file = match std::fs::File::create(file_path.as_str()) {
+                Ok(file) => file,
+                Err(e) => return Err(e),
+            };
+
+            match file.write_all(contents.as_bytes()) {
+                Ok(_) => return Ok(()),
+                Err(e) => return Err(e),
+            }
         }
+
+        Ok(())
     }
 }
 
@@ -97,10 +108,17 @@ pub mod command {
 
     /// Opens a file
     #[tauri::command]
-    pub fn open_file(path: String, file: State<File>) -> String {
+    pub fn open_file(path: String, file: State<File>, window: tauri::Window) -> String {
         file.path(path);
 
-        file.read()
+        match file.read() {
+            Ok(contents) => contents,
+            Err(e) => {
+                tauri::api::dialog::message(Some(&window), "Error", e.to_string());
+                file.path(String::new());
+                String::new()
+            }
+        }
     }
 
     /// Creates a file
@@ -111,14 +129,27 @@ pub mod command {
 
     /// Gets the contents of a file
     #[tauri::command]
-    pub fn get_file(file: State<File>) -> String {
-        file.read()
+    pub fn get_file(file: State<File>, window: tauri::Window) -> String {
+        match file.read() {
+            Ok(contents) => contents,
+            Err(e) => {
+                tauri::api::dialog::message(Some(&window), "Error", e.to_string());
+                file.path(String::new());
+                String::new()
+            }
+        }
     }
 
     /// Overwrites the contents of a file
     #[tauri::command]
-    pub fn overwrite_file(contents: String, file: State<File>) {
-        file.write(contents);
+    pub fn overwrite_file(contents: String, file: State<File>, window: tauri::Window) {
+        match file.write(contents) {
+            Ok(_) => (),
+            Err(e) => {
+                tauri::api::dialog::message(Some(&window), "Error", e.to_string());
+                file.path(String::new());
+            }
+        }
     }
 }
 
