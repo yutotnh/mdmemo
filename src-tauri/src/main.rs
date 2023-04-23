@@ -38,14 +38,24 @@ fn zoom_window(window: tauri::Window, factor: f64) {
     });
 }
 
+/// A file that can be read and written to
 pub struct File {
+    /// The path of the file
     path: Mutex<String>,
+
+    /// The contents of the file
     contents: Mutex<String>,
 }
 
+/// A trait that allows reading and writing to a file
 trait FileReadWrite {
+    /// Sets the path of the file
     fn path(&self, path: String);
+
+    /// Reads the file
     fn read(&self) -> String;
+
+    /// Writes to the file
     fn write(&self, content: String);
 }
 
@@ -79,11 +89,13 @@ impl FileReadWrite for File {
     }
 }
 
+/// Commands that can be invoked from JS
 pub mod command {
     use tauri::State;
 
     use super::*;
 
+    /// Opens a file
     #[tauri::command]
     pub fn open_file(path: String, file: State<File>) -> String {
         file.path(path);
@@ -91,16 +103,19 @@ pub mod command {
         file.read()
     }
 
+    /// Creates a file
     #[tauri::command]
     pub fn create_file(path: String, file: State<File>) {
         file.path(path);
     }
 
+    /// Gets the contents of a file
     #[tauri::command]
     pub fn get_file(file: State<File>) -> String {
         file.read()
     }
 
+    /// Overwrites the contents of a file
     #[tauri::command]
     pub fn overwrite_file(contents: String, file: State<File>) {
         file.write(contents);

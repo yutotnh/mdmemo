@@ -13,6 +13,9 @@ const MDEditor = dynamic<MDEditorProps>(() => import("@uiw/react-md-editor"), {
   ssr: false,
 });
 
+/**
+ * ウィンドウを閉じるコマンド
+ */
 const closeWindow = {
   name: "close-window",
   keyCommand: "closeWindow",
@@ -25,6 +28,9 @@ const closeWindow = {
   },
 };
 
+/**
+ * ウィンドウを最小化するコマンド
+ */
 let isFixedPreview: boolean = false;
 
 const openfile = {
@@ -61,6 +67,12 @@ const openfile = {
   },
 };
 
+/**
+ * ファイルを保存するコマンド
+ * ファイルを保存するダイアログを開き、保存先のパスを取得する
+ * パスが取得できなかった場合は何もしない
+ * パスが取得できた場合は、ファイルを作成し、ファイルの内容を保存する
+ */
 const savefile = {
   name: "savefile",
   keyCommand: "savefile",
@@ -84,6 +96,9 @@ const savefile = {
   },
 };
 
+/**
+ * 中身をフォーマットするコマンド
+ */
 const format = {
   name: "format",
   keyCommand: "format",
