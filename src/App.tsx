@@ -1,17 +1,10 @@
-import { open, save } from "@tauri-apps/api/dialog";
-import { invoke } from "@tauri-apps/api/tauri";
-import "@uiw/react-markdown-preview/markdown.css";
-import { MDEditorProps, PreviewType } from "@uiw/react-md-editor";
-import * as commands from "@uiw/react-md-editor/lib/commands";
-import "@uiw/react-md-editor/markdown-editor.css";
-import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
+import { invoke } from "@tauri-apps/api/tauri";
+import { open, save } from "@tauri-apps/api/dialog";
+import MDEditor, { PreviewType, commands } from "@uiw/react-md-editor";
+import "./App.css";
 import { remark } from "remark";
-import * as zoom from "../zoom";
-
-const MDEditor = dynamic<MDEditorProps>(() => import("@uiw/react-md-editor"), {
-  ssr: false,
-});
+import * as zoom from "./zoom";
 
 /**
  * ウィンドウを閉じるコマンド
@@ -22,9 +15,7 @@ const closeWindow = {
   buttonProps: { "aria-label": "Close window", title: "Close window" },
   icon: <span id="titlebar-close">✕</span>,
   execute: () => {
-    if (process.browser) {
-      invoke("close_window");
-    }
+    invoke("close_window");
   },
 };
 
@@ -55,17 +46,19 @@ const openfile = {
         { name: "Markdown", extensions: ["md"] },
         { name: "All", extensions: ["*"] },
       ],
-    }).then((path: string) => {
+    }).then((path: string | string[] | null) => {
       if (path == null) {
         isFixedPreview = false;
         return;
       }
 
-      invoke("open_file", { path: path }).then((contents: string) => {
-        api.setSelectionRange({ start: 0, end: state.text.length });
-        api.replaceSelection(contents);
-        api.setSelectionRange({ start: 0, end: 0 });
-        isFixedPreview = false;
+      invoke("open_file", { path: path }).then((contents) => {
+        if (typeof contents == "string") {
+          api.setSelectionRange({ start: 0, end: state.text.length });
+          api.replaceSelection(contents);
+          api.setSelectionRange({ start: 0, end: 0 });
+          isFixedPreview = false;
+        }
       });
     });
   },
@@ -93,7 +86,7 @@ const savefile = {
         { name: "Markdown", extensions: ["md"] },
         { name: "All", extensions: ["*"] },
       ],
-    }).then((path: string) => {
+    }).then((path: string | null) => {
       if (path == null) return;
       invoke("create_file", { path: path });
       invoke("overwrite_file", { contents: state.text });
@@ -141,50 +134,80 @@ function App() {
   const [contents, setContents] = useState<string>("");
   const [preview, setPreview] = useState<PreviewType>("edit");
   const [hiddenToolbar, setHiddenToolbar] = useState(false);
+  const [fileName, setFileName] = useState("Untitled ●");
+  const [filePath, setFilePath] = useState("");
 
+  /**
+   * ファイルの中身を保存する
+   * @param contents ファイルの中身
+   */
   function overwrite(contents: string) {
     invoke("overwrite_file", { contents: contents });
     setContents(contents);
   }
 
-  if (process.browser) {
-    window.onblur = () => {
-      if (isFixedPreview) return;
+  /**
+   * ファイル名とパスを表示するコマンド
+   */
+  const filename = {
+    name: "file name",
+    keyCommand: "file name",
+    buttonProps: {
+      title: `${filePath}`,
+    },
+    icon: <span id="titlebar-file-name">{fileName}</span>,
+  };
 
-      setPreview("preview");
-    };
+  window.onblur = () => {
+    if (isFixedPreview) return;
 
-    window.onfocus = () => {
-      if (isFixedPreview) return;
+    setPreview("preview");
+  };
 
-      setPreview("edit");
-    };
+  window.onfocus = () => {
+    if (isFixedPreview) return;
 
-    window.addEventListener("mouseover", () => {
-      setHiddenToolbar(false);
+    setPreview("edit");
+  };
 
-      // ツールバーをドラッグ可能にする
-      let toolbar = document.querySelector(".w-md-editor-toolbar");
-      toolbar?.setAttribute("data-tauri-drag-region", "");
-    });
+  window.addEventListener("mouseover", () => {
+    setHiddenToolbar(false);
 
-    window.addEventListener("mouseout", () => {
-      setHiddenToolbar(true);
-    });
-  }
+    // ツールバーをドラッグ可能にする
+    let toolbar = document.querySelector(".w-md-editor-toolbar");
+    toolbar?.setAttribute("data-tauri-drag-region", "");
+  });
+
+  window.addEventListener("mouseout", () => {
+    setHiddenToolbar(true);
+  });
 
   useEffect(() => {
-    if (process.browser) {
-      // リロード時にファイルを読み込む
-      invoke("get_file").then((file) => setContents(file as string));
-    }
+    // リロード時にファイルを読み込む
+    invoke("get_file").then((file) => setContents(file as string));
   }, []);
+
+  useEffect(() => {
+    // リロード時にファイルを読み込む
+    invoke("get_path")
+      .then((response) => {
+        if (Array.isArray(response)) {
+          setFilePath(response[0] as string);
+
+          setFileName(response[1] as string);
+        }
+      })
+      .catch(() => {
+        setFileName("Untitled ●");
+        setFilePath("");
+      });
+  }, [contents]);
 
   return (
     <div className="container">
       <MDEditor
         value={contents}
-        onChange={(contents) => overwrite(contents)}
+        onChange={(contents) => overwrite(contents as string)}
         fullscreen={true}
         preview={preview}
         hideToolbar={hiddenToolbar}
@@ -218,6 +241,7 @@ function App() {
               },
             }
           ),
+          filename,
         ]}
         extraCommands={[
           commands.codeLive,
