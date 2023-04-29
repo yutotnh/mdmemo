@@ -52,6 +52,9 @@ trait FileReadWrite {
     /// Sets the path of the file
     fn path(&self, path: String);
 
+    /// Gets the path of the file
+    fn get_path(&self) -> String;
+
     /// Reads the file
     fn read(&self) -> Result<String, std::io::Error>;
 
@@ -62,6 +65,10 @@ trait FileReadWrite {
 impl FileReadWrite for File {
     fn path(&self, path: String) {
         *self.path.lock().unwrap() = path;
+    }
+
+    fn get_path(&self) -> String {
+        self.path.lock().unwrap().clone()
     }
 
     fn read(&self) -> Result<String, std::io::Error> {
@@ -151,6 +158,25 @@ pub mod command {
             }
         }
     }
+
+    /// Gets the filename of a file
+    #[tauri::command]
+    pub fn get_path(file: State<File>, window: tauri::Window) -> Result<Vec<String>, String> {
+        if file.get_path() == "" {
+            window.set_title("Untitled ● - mdmemo").unwrap();
+            return Err(String::new());
+        }
+
+        let path = file.get_path();
+        let path = std::path::Path::new(&path);
+
+        let filename = path.file_name().unwrap().to_str().unwrap().to_string();
+
+        // TODO mdmemo の部分を tauri.conf.json から取得したい
+        let title = filename.clone() + " - mdmemo";
+        window.set_title(&title).unwrap();
+        Ok(vec![path.to_str().unwrap().to_string(), filename])
+    }
 }
 
 fn main() {
@@ -161,7 +187,8 @@ fn main() {
             command::open_file,
             command::create_file,
             command::overwrite_file,
-            command::get_file
+            command::get_file,
+            command::get_path,
         ])
         .manage(File {
             path: Mutex::new(String::new()),
