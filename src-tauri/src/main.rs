@@ -9,11 +9,6 @@ use std::{
 };
 
 #[tauri::command]
-fn close_window(window: tauri::Window) {
-    window.close().unwrap();
-}
-
-#[tauri::command]
 fn zoom_window(window: tauri::Window, factor: f64) {
     let _ = window.with_webview(move |webview| {
         #[cfg(target_os = "linux")]
@@ -182,7 +177,6 @@ pub mod command {
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
-            close_window,
             zoom_window,
             command::open_file,
             command::create_file,
