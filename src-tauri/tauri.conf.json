@@ -35,7 +35,8 @@
         "all": false,
         "close": true,
         "startDragging": true,
-        "setTitle": true
+        "setTitle": true,
+        "setAlwaysOnTop": true
       }
     },
     "bundle": {
