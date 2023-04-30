@@ -156,21 +156,16 @@ pub mod command {
 
     /// Gets the filename of a file
     #[tauri::command]
-    pub fn get_path(file: State<File>, window: tauri::Window) -> Result<Vec<String>, String> {
+    #[warn(clippy::result_unit_err)]
+    pub fn get_path(file: State<File>) -> Result<String, String> {
         if file.get_path() == "" {
-            window.set_title("Untitled ● - mdmemo").unwrap();
             return Err(String::new());
         }
 
         let path = file.get_path();
         let path = std::path::Path::new(&path);
 
-        let filename = path.file_name().unwrap().to_str().unwrap().to_string();
-
-        // TODO mdmemo の部分を tauri.conf.json から取得したい
-        let title = filename.clone() + " - mdmemo";
-        window.set_title(&title).unwrap();
-        Ok(vec![path.to_str().unwrap().to_string(), filename])
+        Ok(path.to_str().unwrap().to_string())
     }
 }
 

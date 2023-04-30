@@ -13,10 +13,16 @@
   "tauri": {
     "allowlist": {
       "all": false,
+      "app": {
+        "all": true
+      },
       "dialog": {
         "all": true,
         "open": true,
         "save": true
+      },
+      "path": {
+        "all": true
       },
       "shell": {
         "all": false,
@@ -25,7 +31,8 @@
       "window": {
         "all": false,
         "close": true,
-        "startDragging": true
+        "startDragging": true,
+        "setTitle": true
       }
     },
     "bundle": {
