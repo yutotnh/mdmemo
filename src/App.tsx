@@ -1,196 +1,17 @@
-import { getName, getTauriVersion, getVersion } from "@tauri-apps/api/app";
-import { message, open, save } from "@tauri-apps/api/dialog";
-import * as os from "@tauri-apps/api/os";
+import { getName } from "@tauri-apps/api/app";
 import { basename } from "@tauri-apps/api/path";
 import { invoke } from "@tauri-apps/api/tauri";
 import { appWindow } from "@tauri-apps/api/window";
 import MDEditor, { PreviewType, commands } from "@uiw/react-md-editor";
 import { useEffect, useState } from "react";
-import { remark } from "remark";
 import "./App.css";
-import * as zoom from "./zoom";
-
-let isAlwaysOnTop: boolean = false;
-
-/**
- * 常に最前面に表示するトグルコマンド
- */
-const toggleAlwaysOnTop = {
-  name: "toggle-always-on-top",
-  keyCommand: "toggleAlwaysOnTop",
-  buttonProps: {
-    "aria-label": "Toggle always on top",
-    title: "Toggle always on top",
-  },
-  icon: (
-    <span
-      id="titlebar-toggle-always-on-top"
-      style={{ filter: `grayscale(100%)` }}
-    >
-      📌
-    </span>
-  ),
-  execute: () => {
-    isAlwaysOnTop = !isAlwaysOnTop;
-    appWindow.setAlwaysOnTop(isAlwaysOnTop);
-  },
-};
-
-/**
- * ウィンドウを閉じるコマンド
- */
-const closeWindow = {
-  name: "close-window",
-  keyCommand: "closeWindow",
-  buttonProps: { "aria-label": "Close window", title: "Close window" },
-  icon: <span id="titlebar-close">✕</span>,
-  execute: () => {
-    appWindow.close();
-  },
-};
-
-let isFixedPreview: boolean = false;
-
-/**
- * ファイルを開くコマンド
- *
- * ファイルを開くダイアログを開き、開くファイルのパスを取得する
- *
- * 取得したパスのファイルのテキストを取得し、エディタに表示する
- */
-const openfile = {
-  name: "openfile",
-  keyCommand: "openfile",
-  shortcuts: "ctrlcmd+o",
-  buttonProps: {
-    "aria-label": "Open File (Ctrl+O)",
-    title: "Open File (Ctrl+O)",
-  },
-  icon: <span id="titlebar-file-open">Open File</span>,
-  execute: (state: commands.ExecuteState, api: commands.TextAreaTextApi) => {
-    isFixedPreview = true;
-    open({
-      multiple: false,
-      directory: false,
-      filters: [
-        { name: "Markdown", extensions: ["md"] },
-        { name: "All", extensions: ["*"] },
-      ],
-    }).then((path: string | string[] | null) => {
-      if (path == null) {
-        isFixedPreview = false;
-        return;
-      }
-
-      invoke("open_file", { path: path }).then((contents) => {
-        if (typeof contents == "string") {
-          api.setSelectionRange({ start: 0, end: state.text.length });
-          api.replaceSelection(contents);
-          api.setSelectionRange({ start: 0, end: 0 });
-          isFixedPreview = false;
-        }
-      });
-    });
-  },
-};
-
-/**
- * テキストをファイルに保存するコマンド
- *
- * ファイルを保存するダイアログを開き、保存先のパスを取得する
- *
- * 取得したパスのファイルにテキストを保存する
- */
-const savefile = {
-  name: "savefile",
-  keyCommand: "savefile",
-  shortcuts: "ctrlcmd+shift+s",
-  buttonProps: {
-    "aria-label": "Save File (Ctrl+Shift+S)",
-    title: "Save File (Ctrl+Shift+S)",
-  },
-  icon: <span id="titlebar-file">Save File</span>,
-  execute: (state: commands.ExecuteState) => {
-    save({
-      filters: [
-        { name: "Markdown", extensions: ["md"] },
-        { name: "All", extensions: ["*"] },
-      ],
-    }).then((path: string | null) => {
-      if (path == null) return;
-      invoke("create_file", { path: path });
-      invoke("overwrite_file", { contents: state.text });
-    });
-  },
-};
-
-/**
- * テキストをフォーマットするコマンド
- */
-const format = {
-  name: "format",
-  keyCommand: "format",
-  shortcuts: "alt+shift+f",
-  buttonProps: {
-    "aria-label": "Format File (Alt+Shift+F)",
-    title: "Format (Alt+Shift+F)",
-  },
-  icon: <span id="titlebar-format">Format</span>,
-  execute: (state: commands.ExecuteState, api: commands.TextAreaTextApi) => {
-    // フォーマット前後でカーソル位置を保持するために、
-    // フォーマット前のテキストのカーソル位置にマークをつける
-    api.setSelectionRange({
-      start: state.selection.end,
-      end: state.selection.end,
-    });
-    let mark = "<!-- CURSOR_POSITION -->";
-    let text =
-      state.text.slice(0, state.selection.end) +
-      mark +
-      state.text.slice(state.selection.end);
-
-    // フォーマット前に基づくフォーマット後のカーソル位置を取得
-    let cursor = remark().processSync(text).toString().indexOf(mark);
-
-    const formatted = remark().processSync(state.text).toString();
-    api.setSelectionRange({ start: 0, end: state.text.length });
-    api.replaceSelection(formatted);
-
-    api.setSelectionRange({ start: cursor, end: cursor });
-  },
-};
-
-/**
- * アプリの情報を表示するコマンド
- */
-const about = {
-  name: "version",
-  keyCommand: "version",
-  buttonProps: {
-    "aria-label": "Version",
-    title: "Version",
-  },
-  icon: <span id="titlebar-about">About</span>,
-  execute: () => {
-    const printAbout = async () => {
-      const appName = await getName();
-      const appVersion = await getVersion();
-      const tauriVersion = await getTauriVersion();
-      const osInfo = {
-        type: await os.type(),
-        arch: await os.arch(),
-        version: await os.version(),
-      };
-
-      message(
-        `${appName}\nVersion: ${appVersion}\nTauri: ${tauriVersion}\nOS: ${osInfo.type} ${osInfo.arch} ${osInfo.version}`,
-        "About"
-      );
-    };
-
-    printAbout();
-  },
-};
+import { about } from "./commands/about";
+import { closeWindow } from "./commands/closeWindow";
+import { isFixedPreview, openFile } from "./commands/openFile";
+import { saveFile } from "./commands/saveFile";
+import { toggleAlwaysOnTop } from "./commands/toggleAlwaysOnTop";
+import { format } from "./commands/format";
+import * as zoom from "./commands/zoom";
 
 function App() {
   const [contents, setContents] = useState<string>("");
@@ -285,7 +106,7 @@ function App() {
         preview={preview}
         hideToolbar={hiddenToolbar}
         commands={[
-          commands.group([openfile, savefile], {
+          commands.group([openFile, saveFile], {
             name: "file",
             groupName: "file",
             icon: (
