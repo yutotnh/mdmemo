@@ -1,12 +1,13 @@
-import { useEffect, useState } from "react";
-import { getName } from "@tauri-apps/api/app";
+import { getName, getTauriVersion, getVersion } from "@tauri-apps/api/app";
+import { message, open, save } from "@tauri-apps/api/dialog";
+import * as os from "@tauri-apps/api/os";
 import { basename } from "@tauri-apps/api/path";
 import { invoke } from "@tauri-apps/api/tauri";
 import { appWindow } from "@tauri-apps/api/window";
-import { open, save } from "@tauri-apps/api/dialog";
 import MDEditor, { PreviewType, commands } from "@uiw/react-md-editor";
-import "./App.css";
+import { useEffect, useState } from "react";
 import { remark } from "remark";
+import "./App.css";
 import * as zoom from "./zoom";
 
 /**
@@ -133,6 +134,38 @@ const format = {
   },
 };
 
+/**
+ * アプリの情報を表示するコマンド
+ */
+const about = {
+  name: "version",
+  keyCommand: "version",
+  buttonProps: {
+    "aria-label": "Version",
+    title: "Version",
+  },
+  icon: <span id="titlebar-about">About</span>,
+  execute: () => {
+    const printAbout = async () => {
+      const appName = await getName();
+      const appVersion = await getVersion();
+      const tauriVersion = await getTauriVersion();
+      const osInfo = {
+        type: await os.type(),
+        arch: await os.arch(),
+        version: await os.version(),
+      };
+
+      message(
+        `${appName}\nVersion: ${appVersion}\nTauri: ${tauriVersion}\nOS: ${osInfo.type} ${osInfo.arch} ${osInfo.version}`,
+        "About"
+      );
+    };
+
+    printAbout();
+  },
+};
+
 function App() {
   const [contents, setContents] = useState<string>("");
   const [preview, setPreview] = useState<PreviewType>("edit");
@@ -255,6 +288,19 @@ function App() {
               },
             }
           ),
+          commands.group([about], {
+            name: "Help",
+            groupName: "Help",
+            icon: (
+              <span id="titlebar-help" style={{ filter: "grayscale(100%)" }}>
+                ❓
+              </span>
+            ),
+            buttonProps: {
+              "aria-label": "Help",
+              title: "Help",
+            },
+          }),
           filename,
         ]}
         extraCommands={[
