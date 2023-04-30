@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { getName } from "@tauri-apps/api/app";
+import { basename } from "@tauri-apps/api/path";
 import { invoke } from "@tauri-apps/api/tauri";
 import { appWindow } from "@tauri-apps/api/window";
 import { open, save } from "@tauri-apps/api/dialog";
@@ -189,18 +191,29 @@ function App() {
   }, []);
 
   useEffect(() => {
-    // リロード時にファイルを読み込む
+    // タイトルバーのファイル名とウィンドウのタイトルを更新する
+    // ウィンドウのタイトルは "ファイル名 - アプリ名" とする
     invoke("get_path")
       .then((response) => {
-        if (Array.isArray(response)) {
-          setFilePath(response[0] as string);
+        setFilePath(response as string);
 
-          setFileName(response[1] as string);
-        }
+        basename(response as string).then((basename) => {
+          setFileName(basename);
+
+          getName().then((name) => {
+            appWindow.setTitle(`${basename} - ${name}`);
+          });
+        });
       })
       .catch(() => {
+        // VSCodeのように、タイトルバーのファイル名の後ろに●をつけ、
+        // ウィンドウのタイトルは "● Untitled - アプリ名" とする
         setFileName("Untitled ●");
         setFilePath("");
+
+        getName().then((name) => {
+          appWindow.setTitle(`●  Untitled - ${name}`);
+        });
       });
   }, [contents]);
 
