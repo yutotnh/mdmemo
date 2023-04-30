@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
+import { appWindow } from "@tauri-apps/api/window";
 import { open, save } from "@tauri-apps/api/dialog";
 import MDEditor, { PreviewType, commands } from "@uiw/react-md-editor";
 import "./App.css";
@@ -15,7 +16,7 @@ const closeWindow = {
   buttonProps: { "aria-label": "Close window", title: "Close window" },
   icon: <span id="titlebar-close">✕</span>,
   execute: () => {
-    invoke("close_window");
+    appWindow.close();
   },
 };
 
