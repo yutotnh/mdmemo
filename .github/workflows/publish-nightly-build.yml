@@ -34,7 +34,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
+          tagName: v0.0.0 # nightly-build専用のタグ
           releaseName: "Nightly build"
           releaseDraft: true
           prerelease: false
