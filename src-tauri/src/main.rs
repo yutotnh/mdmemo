@@ -32,10 +32,25 @@ fn zoom_window(window: tauri::Window, factor: f64) {
     });
 }
 
+/// A file that can be read and written to
+struct IsAlwaysOnTop(Mutex<bool>);
+
+#[tauri::command]
+fn set_always_on_top(is_always_on_top: bool, state_always_on_top: tauri::State<IsAlwaysOnTop>) {
+    *state_always_on_top.0.lock().unwrap() = is_always_on_top;
+}
+
+#[tauri::command]
+fn get_always_on_top(state_always_on_top: tauri::State<IsAlwaysOnTop>) -> bool {
+    *state_always_on_top.0.lock().unwrap()
+}
+
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             zoom_window,
+            set_always_on_top,
+            get_always_on_top,
             file::command::set_path,
             file::command::read_file,
             file::command::write_file,

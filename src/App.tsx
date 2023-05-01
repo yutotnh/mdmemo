@@ -10,7 +10,10 @@ import { closeWindow } from "./commands/closeWindow";
 import { format } from "./commands/format";
 import { isFileOpen, openFile } from "./commands/openFile";
 import { saveFile } from "./commands/saveFile";
-import { toggleAlwaysOnTop } from "./commands/toggleAlwaysOnTop";
+import {
+  setAlwaysOnTopCommandStyle,
+  toggleAlwaysOnTop,
+} from "./commands/toggleAlwaysOnTop";
 import * as zoom from "./commands/zoom";
 
 function App() {
@@ -62,6 +65,8 @@ function App() {
     // ファイル名をドラッグ可能にする
     let filename = document.querySelector("#titlebar-file-name");
     filename?.setAttribute("data-tauri-drag-region", "");
+
+    setAlwaysOnTopCommandStyle();
   });
 
   window.addEventListener("mouseout", () => {
@@ -71,6 +76,9 @@ function App() {
   useEffect(() => {
     // リロード時にファイルを読み込む
     invoke("read_file").then((contents) => setContents(contents as string));
+
+    // リロード時にスタイルがリセットされるので、スタイルを再設定する
+    setAlwaysOnTopCommandStyle();
   }, []);
 
   useEffect(() => {
