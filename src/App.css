@@ -2,3 +2,13 @@
 .wmde-markdown * {
   margin: 0px !important;
 }
+
+/* アプリが黒一色だと背景が黒色の時にアプリの位置・存在がわかりづらいため、アプリの上部に色を付ける*/
+.w-md-editor {
+  border-top: #61dafb 3px solid;
+}
+
+/* 小さいメモ帳を目指しているのでツールバーの余白を減らす */
+.w-md-editor-toolbar {
+  padding: 3px 0px;
+}
