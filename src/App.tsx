@@ -14,10 +14,10 @@ import { toggleAlwaysOnTop } from "./commands/toggleAlwaysOnTop";
 import * as zoom from "./commands/zoom";
 
 function App() {
-  const [contents, setContents] = useState<string>("");
+  const [contents, setContents] = useState("");
   const [preview, setPreview] = useState<PreviewType>("edit");
   const [hiddenToolbar, setHiddenToolbar] = useState(false);
-  const [fileName, setFileName] = useState("Untitled ●");
+  const [fileName, setFileName] = useState("");
   const [filePath, setFilePath] = useState("");
 
   /**
