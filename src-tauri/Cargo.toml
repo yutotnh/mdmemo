@@ -1,6 +1,6 @@
 [package]
 name = "mdmemo"
-version = "0.0.0"
+version = "0.1.0"
 description = "Notepad for Markdown"
 authors = ["yutotnh <57719497+yutotnh@users.noreply.github.com>"]
 lisence-file = "LICENSE"
