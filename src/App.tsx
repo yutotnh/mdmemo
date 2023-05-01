@@ -7,10 +7,10 @@ import { useEffect, useState } from "react";
 import "./App.css";
 import { about } from "./commands/about";
 import { closeWindow } from "./commands/closeWindow";
-import { isFixedPreview, openFile } from "./commands/openFile";
+import { format } from "./commands/format";
+import { isFileOpen, openFile } from "./commands/openFile";
 import { saveFile } from "./commands/saveFile";
 import { toggleAlwaysOnTop } from "./commands/toggleAlwaysOnTop";
-import { format } from "./commands/format";
 import * as zoom from "./commands/zoom";
 
 function App() {
@@ -42,14 +42,13 @@ function App() {
   };
 
   window.onblur = () => {
-    if (isFixedPreview) return;
+    // 開いたファイルの中身が表示されないため、"開く"ダイアログが開かれている場合はプレビューを表示しない
+    if (isFileOpen) return;
 
     setPreview("preview");
   };
 
   window.onfocus = () => {
-    if (isFixedPreview) return;
-
     setPreview("edit");
   };
 

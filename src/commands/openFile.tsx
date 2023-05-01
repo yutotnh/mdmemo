@@ -1,8 +1,8 @@
 import { open } from "@tauri-apps/api/dialog";
-import { ICommand, commands } from "@uiw/react-md-editor";
 import { invoke } from "@tauri-apps/api/tauri";
+import { ICommand, commands } from "@uiw/react-md-editor";
 
-export let isFixedPreview: boolean = false;
+export let isFileOpen: boolean = false;
 
 /**
  * ファイルを開くコマンド
@@ -21,7 +21,7 @@ export const openFile: ICommand = {
   },
   icon: <span id="titlebar-file-open">Open File</span>,
   execute: (state: commands.ExecuteState, api: commands.TextAreaTextApi) => {
-    isFixedPreview = true;
+    isFileOpen = true;
     open({
       multiple: false,
       directory: false,
@@ -31,7 +31,7 @@ export const openFile: ICommand = {
       ],
     }).then((path: string | string[] | null) => {
       if (path == null) {
-        isFixedPreview = false;
+        isFileOpen = false;
         return;
       }
 
@@ -40,7 +40,7 @@ export const openFile: ICommand = {
           api.setSelectionRange({ start: 0, end: state.text.length });
           api.replaceSelection(contents);
           api.setSelectionRange({ start: 0, end: 0 });
-          isFixedPreview = false;
+          isFileOpen = false;
         }
       });
     });
