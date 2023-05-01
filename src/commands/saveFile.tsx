@@ -26,8 +26,13 @@ export const saveFile: ICommand = {
       ],
     }).then((path: string | null) => {
       if (path == null) return;
-      invoke("create_file", { path: path });
-      invoke("overwrite_file", { contents: state.text });
+      invoke("set_path", { path: path }).then(() => {
+        invoke("write_file", { contents: state.text }).then(() => {
+          // タイトルバーのファイル名を更新するためにリロードする
+          // 本当はもっといい方法があるはず
+          window.location.reload();
+        });
+      });
     });
   },
 };

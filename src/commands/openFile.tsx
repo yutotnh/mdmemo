@@ -35,14 +35,24 @@ export const openFile: ICommand = {
         return;
       }
 
-      invoke("open_file", { path: path }).then((contents) => {
-        if (typeof contents == "string") {
-          api.setSelectionRange({ start: 0, end: state.text.length });
-          api.replaceSelection(contents);
-          api.setSelectionRange({ start: 0, end: 0 });
+      invoke("set_path", { path: path })
+        .then(() => {
+          invoke("read_file")
+            .then((contents) => {
+              if (typeof contents == "string") {
+                api.setSelectionRange({ start: 0, end: state.text.length });
+                api.replaceSelection(contents);
+                api.setSelectionRange({ start: 0, end: 0 });
+                isFileOpen = false;
+              }
+            })
+            .catch(() => {
+              isFileOpen = false;
+            });
+        })
+        .catch(() => {
           isFileOpen = false;
-        }
-      });
+        });
     });
   },
 };

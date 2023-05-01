@@ -24,8 +24,8 @@ function App() {
    * ファイルの中身を保存する
    * @param contents ファイルの中身
    */
-  function overwrite(contents: string) {
-    invoke("overwrite_file", { contents: contents });
+  function write(contents: string) {
+    invoke("write_file", { contents: contents });
     setContents(contents);
   }
 
@@ -70,7 +70,7 @@ function App() {
 
   useEffect(() => {
     // リロード時にファイルを読み込む
-    invoke("get_file").then((file) => setContents(file as string));
+    invoke("read_file").then((contents) => setContents(contents as string));
   }, []);
 
   useEffect(() => {
@@ -104,7 +104,7 @@ function App() {
     <div className="container">
       <MDEditor
         value={contents}
-        onChange={(contents) => overwrite(contents as string)}
+        onChange={(contents) => write(contents as string)}
         fullscreen={true}
         preview={preview}
         hideToolbar={hiddenToolbar}
