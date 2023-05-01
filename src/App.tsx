@@ -153,13 +153,7 @@ function App() {
           }),
           filename,
         ]}
-        extraCommands={[
-          toggleAlwaysOnTop,
-          commands.codeLive,
-          commands.codeEdit,
-          commands.codePreview,
-          closeWindow,
-        ]}
+        extraCommands={[toggleAlwaysOnTop, closeWindow]}
         onWheel={zoom.handleWheel}
         onKeyDown={zoom.handleKeyDown}
         className="w-md-editor-fullscreen" // 常にフルスクリーンにする
