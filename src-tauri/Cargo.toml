@@ -1,11 +1,12 @@
 [package]
 name = "mdmemo"
 version = "0.0.0"
-description = "A Tauri App"
-authors = ["you"]
-license = ""
-repository = ""
+description = "Notepad for Markdown"
+authors = ["yutotnh <57719497+yutotnh@users.noreply.github.com>"]
+lisence-file = "LICENSE"
+repository = "https://github.com/yutotnh/mdmemo"
 edition = "2021"
+readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -13,16 +14,7 @@ edition = "2021"
 tauri-build = { version = "1.2", features = [] }
 
 [dependencies]
-tauri = { version = "1.2", features = [
-    "app-all",
-    "dialog-all",
-    "os-all",
-    "path-all",
-    "shell-open",
-    "window-close",
-    "window-set-title",
-    "window-start-dragging",
-] }
+tauri = { version = "1.2", features = ["app-all", "dialog-all", "os-all", "path-all", "shell-open", "window-close", "window-set-always-on-top", "window-set-title", "window-start-dragging"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 [target.'cfg(target_os = "linux")'.dependencies]
