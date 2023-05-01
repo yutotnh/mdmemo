@@ -44,6 +44,36 @@ function App() {
     icon: <span id="titlebar-file-name">{fileName}</span>,
   };
 
+  /**
+   * タイトルバーのファイル名とウィンドウのタイトルを更新する
+   *
+   * ウィンドウのタイトルは "ファイル名 - アプリ名" とする
+   */
+  function setFilename() {
+    invoke("get_path")
+      .then((response) => {
+        setFilePath(response as string);
+
+        basename(response as string).then((basename) => {
+          setFileName(basename);
+
+          getName().then((name) => {
+            appWindow.setTitle(`${basename} - ${name}`);
+          });
+        });
+      })
+      .catch(() => {
+        // VSCodeのように、タイトルバーのファイル名の後ろに●をつけ、
+        // ウィンドウのタイトルは "● Untitled - アプリ名" とする
+        setFileName("Untitled ●");
+        setFilePath("");
+
+        getName().then((name) => {
+          appWindow.setTitle(`●  Untitled - ${name}`);
+        });
+      });
+  }
+
   window.onblur = () => {
     // 開いたファイルの中身が表示されないため、"開く"ダイアログが開かれている場合はプレビューを表示しない
     if (isFileOpen) return;
@@ -82,30 +112,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    // タイトルバーのファイル名とウィンドウのタイトルを更新する
-    // ウィンドウのタイトルは "ファイル名 - アプリ名" とする
-    invoke("get_path")
-      .then((response) => {
-        setFilePath(response as string);
-
-        basename(response as string).then((basename) => {
-          setFileName(basename);
-
-          getName().then((name) => {
-            appWindow.setTitle(`${basename} - ${name}`);
-          });
-        });
-      })
-      .catch(() => {
-        // VSCodeのように、タイトルバーのファイル名の後ろに●をつけ、
-        // ウィンドウのタイトルは "● Untitled - アプリ名" とする
-        setFileName("Untitled ●");
-        setFilePath("");
-
-        getName().then((name) => {
-          appWindow.setTitle(`●  Untitled - ${name}`);
-        });
-      });
+    setFilename();
   }, [contents]);
 
   return (
