@@ -238,6 +238,10 @@ function App() {
     // ツールバーをドラッグ可能にする
     let toolbar = document.querySelector(".w-md-editor-toolbar");
     toolbar?.setAttribute("data-tauri-drag-region", "");
+
+    // ファイル名をドラッグ可能にする
+    let filename = document.querySelector("#titlebar-file-name");
+    filename?.setAttribute("data-tauri-drag-region", "");
   });
 
   window.addEventListener("mouseout", () => {
