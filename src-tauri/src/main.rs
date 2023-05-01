@@ -45,7 +45,7 @@ pub struct File {
 /// A trait that allows reading and writing to a file
 trait FileReadWrite {
     /// Sets the path of the file
-    fn path(&self, path: String);
+    fn set_path(&self, path: String);
 
     /// Gets the path of the file
     fn get_path(&self) -> String;
@@ -58,7 +58,7 @@ trait FileReadWrite {
 }
 
 impl FileReadWrite for File {
-    fn path(&self, path: String) {
+    fn set_path(&self, path: String) {
         *self.path.lock().unwrap() = path;
     }
 
@@ -108,35 +108,20 @@ pub mod command {
 
     use super::*;
 
-    /// Opens a file
-    #[tauri::command]
-    pub fn open_file(path: String, file: State<File>, window: tauri::Window) -> String {
-        file.path(path);
-
-        match file.read() {
-            Ok(contents) => contents,
-            Err(e) => {
-                tauri::api::dialog::message(Some(&window), "Error", e.to_string());
-                file.path(String::new());
-                String::new()
-            }
-        }
-    }
-
     /// Creates a file
     #[tauri::command]
-    pub fn create_file(path: String, file: State<File>) {
-        file.path(path);
+    pub fn set_path(path: String, file: State<File>) {
+        file.set_path(path);
     }
 
-    /// Gets the contents of a file
+    /// Opens a file
     #[tauri::command]
-    pub fn get_file(file: State<File>, window: tauri::Window) -> String {
+    pub fn read_file(file: State<File>, window: tauri::Window) -> String {
         match file.read() {
             Ok(contents) => contents,
             Err(e) => {
                 tauri::api::dialog::message(Some(&window), "Error", e.to_string());
-                file.path(String::new());
+                file.set_path(String::new());
                 String::new()
             }
         }
@@ -144,19 +129,18 @@ pub mod command {
 
     /// Overwrites the contents of a file
     #[tauri::command]
-    pub fn overwrite_file(contents: String, file: State<File>, window: tauri::Window) {
+    pub fn write_file(contents: String, file: State<File>, window: tauri::Window) {
         match file.write(contents) {
             Ok(_) => (),
             Err(e) => {
                 tauri::api::dialog::message(Some(&window), "Error", e.to_string());
-                file.path(String::new());
+                file.set_path(String::new());
             }
         }
     }
 
     /// Gets the filename of a file
     #[tauri::command]
-    #[warn(clippy::result_unit_err)]
     pub fn get_path(file: State<File>) -> Result<String, String> {
         if file.get_path() == "" {
             return Err(String::new());
@@ -173,10 +157,9 @@ fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             zoom_window,
-            command::open_file,
-            command::create_file,
-            command::overwrite_file,
-            command::get_file,
+            command::set_path,
+            command::read_file,
+            command::write_file,
             command::get_path,
         ])
         .manage(File {
