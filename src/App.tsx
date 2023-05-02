@@ -112,23 +112,26 @@ function App() {
     // リロード時にスタイルがリセットされるので、スタイルを再設定する
     setAlwaysOnTopCommandStyle();
 
-    invoke("get_path").then((response) => {
-      // ファイルの変更を監視して、ファイルが変更されたらファイルを読み込む
-      watchImmediate(
-        [response as string],
-        () => {
-          invoke("read_file")
-            .then((contents) => setContents(contents as string))
-            .catch(() => {
-              // ファイルにアクセスできない場合はファイル名をリセットする
-              setFilename();
-            });
-        },
-        {}
-      ).then((response) => {
-        appendStopWatcher(response);
-      });
-    });
+    invoke("get_path")
+      .then((response) => {
+        console.log(response);
+        // ファイルの変更を監視して、ファイルが変更されたらファイルを読み込む
+        watchImmediate(
+          [response as string],
+          () => {
+            invoke("read_file")
+              .then((contents) => setContents(contents as string))
+              .catch(() => {
+                // ファイルにアクセスできない場合はファイル名をリセットする
+                setFilename();
+              });
+          },
+          {}
+        ).then((response) => {
+          appendStopWatcher(response);
+        });
+      })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
