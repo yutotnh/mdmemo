@@ -96,7 +96,7 @@ pub mod command {
             Err(e) => {
                 tauri::api::dialog::message(Some(&window), "Error", e.to_string());
                 file.set_path(String::new());
-                Err(String::new())
+                Err(e.to_string())
             }
         }
     }
@@ -113,7 +113,7 @@ pub mod command {
             Err(e) => {
                 tauri::api::dialog::message(Some(&window), "Error", e.to_string());
                 file.set_path(String::new());
-                Err(String::new())
+                Err(e.to_string())
             }
         }
     }
