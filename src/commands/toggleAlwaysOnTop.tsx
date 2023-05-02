@@ -49,6 +49,7 @@ export async function setAlwaysOnTopCommandStyle() {
 export const toggleAlwaysOnTop: ICommand = {
   name: "toggle-always-on-top",
   keyCommand: "toggleAlwaysOnTop",
+  shortcuts: "ctrlcmd+t",
   buttonProps: {
     "aria-label": "Toggle always on top",
     title: "Toggle always on top",
