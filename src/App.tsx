@@ -98,7 +98,11 @@ function App() {
     let filename = document.querySelector("#titlebar-file-name");
     filename?.setAttribute("data-tauri-drag-region", "");
 
-    setAlwaysOnTopCommandStyle();
+    invoke("get_always_on_top").then((isAlwaysOnTop) => {
+      if (typeof isAlwaysOnTop !== "boolean") return;
+
+      setAlwaysOnTopCommandStyle(isAlwaysOnTop);
+    });
   });
 
   window.addEventListener("mouseout", () => {
@@ -110,7 +114,11 @@ function App() {
     invoke("read_file").then((contents) => setContents(contents as string));
 
     // リロード時にスタイルがリセットされるので、スタイルを再設定する
-    setAlwaysOnTopCommandStyle();
+    invoke("get_always_on_top").then((isAlwaysOnTop) => {
+      if (typeof isAlwaysOnTop !== "boolean") return;
+
+      setAlwaysOnTopCommandStyle(isAlwaysOnTop);
+    });
 
     invoke("get_path").then((response) => {
       watchImmediate(
