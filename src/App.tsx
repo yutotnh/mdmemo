@@ -15,9 +15,8 @@ import {
   toggleAlwaysOnTop,
 } from "./commands/toggleAlwaysOnTop";
 import * as zoom from "./commands/zoom";
-import { watch, watchImmediate } from "tauri-plugin-fs-watch-api";
+import { watchImmediate } from "tauri-plugin-fs-watch-api";
 import { appendStopWatcher } from "./watchFile";
-import { readFile } from "fs";
 
 function App() {
   const [contents, setContents] = useState("");
