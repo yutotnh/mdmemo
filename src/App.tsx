@@ -113,12 +113,16 @@ function App() {
     setAlwaysOnTopCommandStyle();
 
     invoke("get_path").then((response) => {
+      // ファイルの変更を監視して、ファイルが変更されたらファイルを読み込む
       watchImmediate(
         [response as string],
         () => {
-          invoke("read_file").then((contents) =>
-            setContents(contents as string)
-          );
+          invoke("read_file")
+            .then((contents) => setContents(contents as string))
+            .catch(() => {
+              // ファイルにアクセスできない場合はファイル名をリセットする
+              setFilename();
+            });
         },
         {}
       ).then((response) => {
