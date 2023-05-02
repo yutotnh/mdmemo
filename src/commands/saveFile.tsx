@@ -1,6 +1,8 @@
 import { ICommand, commands } from "@uiw/react-md-editor";
 import { invoke } from "@tauri-apps/api/tauri";
 import { save } from "@tauri-apps/api/dialog";
+import { appendStopWatcher, execAllStopWatcher } from "../watchFile";
+import { watchImmediate } from "tauri-plugin-fs-watch-api";
 
 /**
  * テキストをファイルに保存するコマンド
@@ -26,6 +28,7 @@ export const saveFile: ICommand = {
       ],
     }).then((path: string | null) => {
       if (path == null) return;
+
       invoke("set_path", { path: path }).then(() => {
         invoke("write_file", { contents: state.text }).then(() => {
           // タイトルバーのファイル名を更新するためにリロードする

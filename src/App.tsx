@@ -15,6 +15,9 @@ import {
   toggleAlwaysOnTop,
 } from "./commands/toggleAlwaysOnTop";
 import * as zoom from "./commands/zoom";
+import { watch, watchImmediate } from "tauri-plugin-fs-watch-api";
+import { appendStopWatcher } from "./watchFile";
+import { readFile } from "fs";
 
 function App() {
   const [contents, setContents] = useState("");
@@ -109,6 +112,20 @@ function App() {
 
     // リロード時にスタイルがリセットされるので、スタイルを再設定する
     setAlwaysOnTopCommandStyle();
+
+    invoke("get_path").then((response) => {
+      watchImmediate(
+        [response as string],
+        () => {
+          invoke("read_file").then((contents) =>
+            setContents(contents as string)
+          );
+        },
+        {}
+      ).then((response) => {
+        appendStopWatcher(response);
+      });
+    });
   }, []);
 
   useEffect(() => {
