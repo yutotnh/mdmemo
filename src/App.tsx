@@ -58,11 +58,6 @@ function App() {
     // リロード時にファイルを読み込む
     invoke("read_file").then((contents) => setContents(contents as string));
 
-    // リロード時にスタイルがリセットされるので、スタイルを再設定する
-    invoke("get_always_on_top").then((isAlwaysOnTop) => {
-      if (typeof isAlwaysOnTop !== "boolean") return;
-    });
-
     invoke("get_path")
       .then((response) => {
         // ファイルの変更を監視して、ファイルが変更されたらファイルを読み込む
