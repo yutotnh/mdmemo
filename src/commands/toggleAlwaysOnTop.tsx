@@ -4,11 +4,11 @@ import { ICommand } from "@uiw/react-md-editor";
 
 const commandStyle = {
   /// リロード時にスタイルが一瞬初期化されるので、目立たないように透明にする
-  default: "opacity(0%)",
+  default: "rgba(0, 0, 0, 0.0)",
   /// テーマに合わせるため水色にする
-  active: "hue-rotate(210deg) brightness( 2.0 )",
+  active: "#61dafb",
   /// 無効であることを明確に示すためグレースケールにする
-  inactive: "grayscale(100%)",
+  inactive: "",
 };
 
 /**
@@ -19,7 +19,7 @@ export function setAlwaysOnTopCommandStyle(isAlwaysOnTop: boolean) {
     let commands = document.getElementById("titlebar-toggle-always-on-top");
 
     if (commands == null) return;
-    commands.style.filter = commandStyle["active"];
+    commands.style.color = commandStyle["active"];
 
     const parent = document.querySelector(
       '[data-name="toggle-always-on-top"]'
@@ -30,7 +30,7 @@ export function setAlwaysOnTopCommandStyle(isAlwaysOnTop: boolean) {
     let commands = document.getElementById("titlebar-toggle-always-on-top");
     if (commands == null) return;
 
-    commands.style.filter = commandStyle["inactive"];
+    commands.style.color = commandStyle["inactive"];
 
     const parent = document.querySelector(
       '[data-name="toggle-always-on-top"]'
@@ -54,10 +54,10 @@ export const toggleAlwaysOnTop: ICommand = {
     <span
       id="titlebar-toggle-always-on-top"
       style={{
-        filter: commandStyle["default"],
+        color: commandStyle["default"],
       }}
     >
-      📌
+      Top
     </span>
   ),
   execute: () => {

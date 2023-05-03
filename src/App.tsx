@@ -159,7 +159,7 @@ function App() {
             groupName: "file",
             icon: (
               <span id="titlebar-title" style={{ filter: "grayscale(100%)" }}>
-                📂
+                File
               </span>
             ),
             buttonProps: {
@@ -174,7 +174,7 @@ function App() {
               groupName: "edit",
               icon: (
                 <span id="titlebar-edit" style={{ filter: "grayscale(100%)" }}>
-                  📝
+                  Edit
                 </span>
               ),
               buttonProps: {
@@ -188,7 +188,7 @@ function App() {
             groupName: "Help",
             icon: (
               <span id="titlebar-help" style={{ filter: "grayscale(100%)" }}>
-                ❓
+                Help
               </span>
             ),
             buttonProps: {
@@ -196,6 +196,7 @@ function App() {
               title: "Help",
             },
           }),
+          commands.divider,
           filename,
         ]}
         extraCommands={[toggleAlwaysOnTop, closeWindow]}
