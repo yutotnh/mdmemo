@@ -122,7 +122,6 @@ function App() {
 
     invoke("get_path")
       .then((response) => {
-        console.log(response);
         // ファイルの変更を監視して、ファイルが変更されたらファイルを読み込む
         watchImmediate(
           [response as string],
