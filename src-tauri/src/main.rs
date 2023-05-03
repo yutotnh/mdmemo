@@ -7,6 +7,10 @@ pub mod file;
 
 use std::sync::Mutex;
 
+/// Zooms the window in or out
+///
+/// * `window` - The window to zoom
+/// * `factor` - The zoom factor
 #[tauri::command]
 fn zoom_window(window: tauri::Window, factor: f64) {
     let _ = window.with_webview(move |webview| {
@@ -35,11 +39,17 @@ fn zoom_window(window: tauri::Window, factor: f64) {
 /// A file that can be read and written to
 struct IsAlwaysOnTop(Mutex<bool>);
 
+/// Sets the always on top state
+///
+/// * `is_always_on_top` - The always on top state
 #[tauri::command]
 fn set_always_on_top(is_always_on_top: bool, state_always_on_top: tauri::State<IsAlwaysOnTop>) {
     *state_always_on_top.0.lock().unwrap() = is_always_on_top;
 }
 
+/// Gets the always on top state
+///
+/// * `state_always_on_top` - The always on top state
 #[tauri::command]
 fn get_always_on_top(state_always_on_top: tauri::State<IsAlwaysOnTop>) -> bool {
     *state_always_on_top.0.lock().unwrap()

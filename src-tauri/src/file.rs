@@ -6,15 +6,21 @@ use std::{
 /// A file that can be read and written to
 pub struct File {
     /// The path of the file
+    ///
+    /// If this is empty, the file is not saved to disk
     pub path: Mutex<String>,
 
     /// The contents of the file
+    ///
+    /// This is only used if the file is not saved to disk
     pub contents: Mutex<String>,
 }
 
 /// A trait that allows reading and writing to a file
 trait FileReadWrite {
     /// Sets the path of the file
+    ///
+    /// * `path` - The path of the file
     fn set_path(&self, path: String);
 
     /// Gets the path of the file
@@ -24,6 +30,8 @@ trait FileReadWrite {
     fn read(&self) -> Result<String, std::io::Error>;
 
     /// Writes to the file
+    ///
+    /// * `content` - The content to write to the file
     fn write(&self, content: String) -> Result<(), std::io::Error>;
 }
 
@@ -83,12 +91,18 @@ pub mod command {
     use super::*;
 
     /// Creates a file
+    ///
+    /// * `path` - The path of the file
+    /// * `file` - The file state
     #[tauri::command]
     pub fn set_path(path: String, file: State<File>) {
         file.set_path(path);
     }
 
     /// Opens a file
+    ///
+    /// * `file` - The file state
+    /// * `window` - The window to open the file dialog in
     #[tauri::command]
     pub fn read_file(file: State<File>, window: tauri::Window) -> Result<String, String> {
         match file.read() {
@@ -102,6 +116,10 @@ pub mod command {
     }
 
     /// Overwrites the contents of a file
+    ///
+    /// * `contents` - The contents to write to the file
+    /// * `file` - The file state
+    /// * `window` - The window to open the file dialog in
     #[tauri::command]
     pub fn write_file(
         contents: String,
@@ -119,6 +137,8 @@ pub mod command {
     }
 
     /// Gets the filename of a file
+    ///
+    /// * `file` - The file state
     #[tauri::command]
     pub fn get_path(file: State<File>) -> Result<String, String> {
         if file.get_path() == "" {
