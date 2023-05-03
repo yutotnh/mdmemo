@@ -1,7 +1,4 @@
-import { getName } from "@tauri-apps/api/app";
-import { basename } from "@tauri-apps/api/path";
 import { invoke } from "@tauri-apps/api/tauri";
-import { appWindow } from "@tauri-apps/api/window";
 import MDEditor, { PreviewType, commands } from "@uiw/react-md-editor";
 import { useEffect, useState } from "react";
 import "./App.css";
@@ -14,13 +11,12 @@ import { toggleAlwaysOnTop } from "./commands/toggleAlwaysOnTop";
 import * as zoom from "./commands/zoom";
 import { watchImmediate } from "tauri-plugin-fs-watch-api";
 import { appendStopWatcher } from "./watchFile";
+import { fileInfo } from "./commands/fileInfo";
 
 function App() {
   const [contents, setContents] = useState("");
   const [preview, setPreview] = useState<PreviewType>("edit");
   const [hiddenToolbar, setHiddenToolbar] = useState(false);
-  const [fileName, setFileName] = useState("");
-  const [filePath, setFilePath] = useState("");
 
   /**
    * ファイルの中身を保存する
@@ -29,48 +25,6 @@ function App() {
   function write(contents: string) {
     invoke("write_file", { contents: contents });
     setContents(contents);
-  }
-
-  /**
-   * ファイル名とパスを表示するコマンド
-   */
-  const filename = {
-    name: "file name",
-    keyCommand: "file name",
-    buttonProps: {
-      title: `${filePath}`,
-    },
-    icon: <span id="titlebar-file-name">{fileName}</span>,
-  };
-
-  /**
-   * タイトルバーのファイル名とウィンドウのタイトルを更新する
-   *
-   * ウィンドウのタイトルは "ファイル名 - アプリ名" とする
-   */
-  function setFilename() {
-    invoke("get_path")
-      .then((response) => {
-        setFilePath(response as string);
-
-        basename(response as string).then((basename) => {
-          setFileName(basename);
-
-          getName().then((name) => {
-            appWindow.setTitle(`${basename} - ${name}`);
-          });
-        });
-      })
-      .catch(() => {
-        // VSCodeのように、タイトルバーのファイル名の後ろに●をつけ、
-        // ウィンドウのタイトルは "● Untitled - アプリ名" とする
-        setFileName("Untitled ●");
-        setFilePath("");
-
-        getName().then((name) => {
-          appWindow.setTitle(`●  Untitled - ${name}`);
-        });
-      });
   }
 
   window.onblur = () => {
@@ -115,12 +69,9 @@ function App() {
         watchImmediate(
           [response as string],
           () => {
-            invoke("read_file")
-              .then((contents) => setContents(contents as string))
-              .catch(() => {
-                // ファイルにアクセスできない場合はファイル名をリセットする
-                setFilename();
-              });
+            invoke("read_file").then((contents) =>
+              setContents(contents as string)
+            );
           },
           {}
         ).then((response) => {
@@ -129,10 +80,6 @@ function App() {
       })
       .catch(() => {});
   }, []);
-
-  useEffect(() => {
-    setFilename();
-  }, [contents]);
 
   return (
     <div className="container">
@@ -186,7 +133,7 @@ function App() {
             },
           }),
           commands.divider,
-          filename,
+          fileInfo,
         ]}
         extraCommands={[toggleAlwaysOnTop, closeWindow]}
         onWheel={zoom.handleWheel}
