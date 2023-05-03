@@ -17,7 +17,8 @@
         "all": true
       },
       "dialog": {
-        "all": true,
+        "all": false,
+        "confirm": true,
         "open": true,
         "save": true
       },
