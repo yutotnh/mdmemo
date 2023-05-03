@@ -7,7 +7,7 @@
 
 </div>
 
-# MDMemo
+# mdmemo
 
 Markdown対応の小さなメモ帳
 
