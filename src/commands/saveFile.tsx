@@ -1,8 +1,6 @@
 import { ICommand, commands } from "@uiw/react-md-editor";
 import { invoke } from "@tauri-apps/api/tauri";
 import { save } from "@tauri-apps/api/dialog";
-import { appendStopWatcher, execAllStopWatcher } from "../watchFile";
-import { watchImmediate } from "tauri-plugin-fs-watch-api";
 
 /**
  * テキストをファイルに保存するコマンド

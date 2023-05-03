@@ -1,8 +1,6 @@
 import { open } from "@tauri-apps/api/dialog";
 import { invoke } from "@tauri-apps/api/tauri";
 import { ICommand, commands } from "@uiw/react-md-editor";
-import { watchImmediate } from "tauri-plugin-fs-watch-api";
-import { appendStopWatcher, execAllStopWatcher } from "../watchFile";
 
 export let isFileOpen: boolean = false;
 
@@ -45,9 +43,8 @@ export const openFile: ICommand = {
                 api.setSelectionRange({ start: 0, end: state.text.length });
                 api.replaceSelection(contents);
                 api.setSelectionRange({ start: 0, end: 0 });
-                isFileOpen = false;
               }
-              window.location.reload();
+              isFileOpen = false;
             })
             .catch(() => {
               isFileOpen = false;
