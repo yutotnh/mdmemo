@@ -61,7 +61,6 @@ export const toggleAlwaysOnTop: ICommand = {
       }
     }
 
-    // キーボードショートカットを登録する
     // イベントが重複して登録されないように、useEffect で1度だけ登録する
     useEffect(() => {
       window.addEventListener("keydown", handleKeyDown);
