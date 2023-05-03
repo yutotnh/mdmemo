@@ -29,30 +29,22 @@ export const openFile: ICommand = {
         { name: "Markdown", extensions: ["md"] },
         { name: "All", extensions: ["*"] },
       ],
-    }).then((path: string | string[] | null) => {
-      if (path == null) {
-        isFileOpen = false;
-        return;
-      }
+    })
+      .then((path: string | string[] | null) => {
+        if (path == null) return;
 
-      invoke("set_path", { path: path })
-        .then(() => {
-          invoke("read_file")
-            .then((contents) => {
-              if (typeof contents == "string") {
-                api.setSelectionRange({ start: 0, end: state.text.length });
-                api.replaceSelection(contents);
-                api.setSelectionRange({ start: 0, end: 0 });
-              }
-              isFileOpen = false;
-            })
-            .catch(() => {
-              isFileOpen = false;
-            });
-        })
-        .catch(() => {
-          isFileOpen = false;
+        invoke("set_path", { path: path }).then(() => {
+          invoke("read_file").then((contents) => {
+            if (typeof contents == "string") {
+              api.setSelectionRange({ start: 0, end: state.text.length });
+              api.replaceSelection(contents);
+              api.setSelectionRange({ start: 0, end: 0 });
+            }
+          });
         });
-    });
+      })
+      .finally(() => {
+        isFileOpen = false;
+      });
   },
 };
