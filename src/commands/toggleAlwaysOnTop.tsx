@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api/tauri";
 import { appWindow } from "@tauri-apps/api/window";
 import { ICommand } from "@uiw/react-md-editor";
+import { useEffect, useState } from "react";
 
 const commandStyle = {
   /// リロード時にスタイルが一瞬初期化されるので、目立たないように透明にする
@@ -12,62 +13,80 @@ const commandStyle = {
 };
 
 /**
- * 常に最前面に表示するトグルコマンドのスタイルを設定する
- */
-export function setAlwaysOnTopCommandStyle(isAlwaysOnTop: boolean) {
-  if (isAlwaysOnTop) {
-    let commands = document.getElementById("titlebar-toggle-always-on-top");
-
-    if (commands == null) return;
-    commands.style.color = commandStyle["active"];
-
-    const parent = document.querySelector(
-      '[data-name="toggle-always-on-top"]'
-    )?.parentElement;
-
-    parent?.classList.add("active");
-  } else {
-    let commands = document.getElementById("titlebar-toggle-always-on-top");
-    if (commands == null) return;
-
-    commands.style.color = commandStyle["inactive"];
-
-    const parent = document.querySelector(
-      '[data-name="toggle-always-on-top"]'
-    )?.parentElement;
-    parent?.classList.remove("active");
-  }
-}
-
-/**
  * 常に最前面に表示するトグルコマンド
  */
 export const toggleAlwaysOnTop: ICommand = {
   name: "toggle-always-on-top",
   keyCommand: "toggleAlwaysOnTop",
-  shortcuts: "ctrlcmd+t",
-  buttonProps: {
-    "aria-label": "Toggle always on top",
-    title: "Toggle always on top",
-  },
-  icon: (
-    <span
-      id="titlebar-toggle-always-on-top"
-      style={{
-        color: commandStyle["default"],
-      }}
-    >
-      Top
-    </span>
-  ),
-  execute: () => {
+  render: (command, disabled, executeCommand) => {
+    const [isAlwaysOnTopStyle, setIsAlwaysOnTopStyle] = useState(
+      commandStyle["default"]
+    );
+
+    /**
+     * 常に最前面に表示するかどうかに応じてアイコンのスタイルを変更する
+     *
+     * @param isAlwaysOnTop 常に最前面に表示するかどうか
+     */
+    function setIconStyle(isAlwaysOnTop: boolean) {
+      if (isAlwaysOnTop) {
+        setIsAlwaysOnTopStyle(commandStyle["active"]);
+      } else {
+        setIsAlwaysOnTopStyle(commandStyle["inactive"]);
+      }
+    }
+
+    /**
+     * 常に最前面に表示するかどうかを切り替える
+     */
+    function toggleAlwaysOnTop() {
+      executeCommand(command, command.groupName);
+      invoke("get_always_on_top").then((isAlwaysOnTop) => {
+        if (typeof isAlwaysOnTop != "boolean") return;
+
+        setIconStyle(!isAlwaysOnTop);
+        appWindow.setAlwaysOnTop(!isAlwaysOnTop);
+        invoke("set_always_on_top", { isAlwaysOnTop: !isAlwaysOnTop });
+      });
+    }
+
+    /**
+     * キーボードショートカットを処理する
+     *
+     * @param event キーボードイベント
+     */
+    function handleKeyDown(event: KeyboardEvent) {
+      if ((event.ctrlKey || event.metaKey) && event.key === "t") {
+        toggleAlwaysOnTop();
+      }
+    }
+
+    // キーボードショートカットを登録する
+    // イベントが重複して登録されないように、useEffect で1度だけ登録する
+    useEffect(() => {
+      window.addEventListener("keydown", handleKeyDown);
+    }, []);
+
     invoke("get_always_on_top").then((isAlwaysOnTop) => {
       if (typeof isAlwaysOnTop != "boolean") return;
 
-      appWindow.setAlwaysOnTop(!isAlwaysOnTop);
-      invoke("set_always_on_top", { isAlwaysOnTop: !isAlwaysOnTop });
-
-      setAlwaysOnTopCommandStyle(!isAlwaysOnTop);
+      setIconStyle(isAlwaysOnTop);
     });
+
+    return (
+      <button
+        id="titlebar-toggle-always-on-top"
+        aria-label="Toggle always on top"
+        title="Toggle always on top"
+        onClick={toggleAlwaysOnTop}
+        disabled={disabled}
+        type="button"
+        style={{
+          color: isAlwaysOnTopStyle,
+        }}
+      >
+        Top
+      </button>
+    );
   },
 };
