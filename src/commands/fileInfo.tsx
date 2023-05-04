@@ -85,7 +85,12 @@ export const fileInfo: ICommand = {
     setFileInfo();
 
     return (
-      <span id="titlebar-file-path" aria-label={filePath} title={filePath}>
+      <span
+        id="titlebar-file-info"
+        aria-label={filePath}
+        title={filePath}
+        data-tauri-drag-region // メニュバーが狭いため、表示だけする本コマンドをドラッグ可能にする
+      >
         {fileName}
       </span>
     );
