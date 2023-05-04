@@ -24,14 +24,25 @@ function App() {
   const [contents, setContents] = useRecoilState(contentsState);
   const [preview, setPreview] = useState<PreviewType>("edit");
   const [hiddenToolbar, setHiddenToolbar] = useState(false);
+  const [timerId, setTimerId] = useState<NodeJS.Timeout | null>(null);
 
   /**
    * ファイルの中身を保存する
+   *
+   * 直近の入力から500ms経過しから保存する
+   *
    * @param contents ファイルの中身
    */
   function write(contents: string) {
-    invoke("write_file", { contents: contents });
+    if (timerId != null) {
+      clearTimeout(timerId);
+    }
     setContents(contents);
+    setTimerId(
+      setTimeout(() => {
+        invoke("write_file", { contents: contents });
+      }, 500)
+    );
   }
 
   window.onblur = () => {
@@ -80,7 +91,9 @@ function App() {
     <div className="container">
       <MDEditor
         value={contents}
-        onChange={(contents) => write(contents as string)}
+        onChange={(contents) => {
+          write(contents as string);
+        }}
         fullscreen={true}
         preview={preview}
         hideToolbar={hiddenToolbar}
