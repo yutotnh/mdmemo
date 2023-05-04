@@ -10,6 +10,7 @@ import { fileInfo } from "./commands/fileInfo";
 import { format } from "./commands/format";
 import { openFile } from "./commands/openFile";
 import { saveFile } from "./commands/saveFile";
+import { sourceCode } from "./commands/sourceCode";
 import { toggleAlwaysOnTop } from "./commands/toggleAlwaysOnTop";
 import * as zoom from "./commands/zoom";
 import { appendStopWatcher } from "./watchFile";
@@ -113,7 +114,7 @@ function App() {
               },
             }
           ),
-          commands.group([about], {
+          commands.group([sourceCode, about], {
             name: "Help",
             groupName: "Help",
             icon: (
