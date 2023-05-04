@@ -6,7 +6,7 @@ import { ICommand } from "@uiw/react-md-editor";
 import { useEffect } from "react";
 import { atom, useRecoilState } from "recoil";
 import { watchImmediate } from "tauri-plugin-fs-watch-api";
-import { appendStopWatcher } from "../watchFile";
+import { appendStopWatcher, execAllStopWatcher } from "../watchFile";
 
 export const filePathState = atom({
   key: "filePathState",
@@ -65,21 +65,31 @@ export const fileInfo: ICommand = {
     }
 
     useEffect(() => {
-      invoke("get_path").then((response) => {
-        // ファイルの変更を監視して、ファイルが変更されたらファイルを読み込む
-        watchImmediate(
-          [response as string],
-          () => {
-            invoke("read_file").catch(() => {
-              // ファイルにアクセスできない場合はファイル名をリセットする
-              setFileInfo();
-            });
-          },
-          {}
-        ).then((response) => {
-          appendStopWatcher(response);
+      invoke("get_path")
+        .then((response) => {
+          // ファイルの変更を監視して、ファイルが変更されたらファイルを読み込む
+          watchImmediate(
+            [response as string],
+            () => {
+              invoke("read_file").catch(() => {
+                // ファイルにアクセスできない場合はファイル名をリセットする
+                setFileInfo();
+              });
+            },
+            {}
+          ).then((response) => {
+            execAllStopWatcher();
+            appendStopWatcher(response);
+          });
+        })
+        // ファイルにアクセスできない場合は何もしない
+        .catch(() => {
+          // ファイル名をリセットする
+          setFileInfo();
+
+          // ファイルの変更を監視しているwatcherを停止する
+          execAllStopWatcher();
         });
-      });
     }, []);
 
     setFileInfo();
