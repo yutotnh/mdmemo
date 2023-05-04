@@ -4,8 +4,10 @@ import { basename } from "@tauri-apps/api/path";
 import { invoke } from "@tauri-apps/api/tauri";
 import { appWindow } from "@tauri-apps/api/window";
 import { ICommand } from "@uiw/react-md-editor";
-import { useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilState, useSetRecoilState } from "recoil";
+import { watchImmediate } from "tauri-plugin-fs-watch-api";
 import { contentsState } from "../App";
+import { appendStopWatcher, execAllStopWatcher } from "../watchFile";
 import { fileNameState, filePathState } from "./fileInfo";
 
 /**
@@ -24,7 +26,7 @@ export const saveFile: ICommand = {
     title: "Save File (Ctrl+Shift+S)",
   },
   render: (command, disabled, executeCommand) => {
-    const contents = useRecoilValue(contentsState);
+    const [contents, setContents] = useRecoilState(contentsState);
     const setFilePath = useSetRecoilState(filePathState);
     const setFileName = useSetRecoilState(fileNameState);
 
@@ -50,6 +52,24 @@ export const saveFile: ICommand = {
               getName().then((name) => {
                 appWindow.setTitle(`${basename} - ${name}`);
               });
+            });
+
+            // 既存のファイル監視を停止する
+            execAllStopWatcher();
+
+            // ファイル監視を開始する
+            watchImmediate(
+              [path],
+              () => {
+                invoke("read_file").then((contents) => {
+                  if (typeof contents != "string") return;
+
+                  setContents(contents);
+                });
+              },
+              {}
+            ).then((response) => {
+              appendStopWatcher(response);
             });
           });
         });

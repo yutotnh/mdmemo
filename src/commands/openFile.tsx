@@ -1,12 +1,14 @@
+import { getName } from "@tauri-apps/api/app";
 import { open } from "@tauri-apps/api/dialog";
+import { basename } from "@tauri-apps/api/path";
 import { invoke } from "@tauri-apps/api/tauri";
+import { appWindow } from "@tauri-apps/api/window";
 import { ICommand } from "@uiw/react-md-editor";
 import { useSetRecoilState } from "recoil";
+import { watchImmediate } from "tauri-plugin-fs-watch-api";
 import { contentsState } from "../App";
+import { appendStopWatcher, execAllStopWatcher } from "../watchFile";
 import { fileNameState, filePathState } from "./fileInfo";
-import { basename } from "@tauri-apps/api/path";
-import { getName } from "@tauri-apps/api/app";
-import { appWindow } from "@tauri-apps/api/window";
 
 /**
  * ファイルを開くコマンド
@@ -33,26 +35,43 @@ export const openFile: ICommand = {
           { name: "All", extensions: ["*"] },
         ],
       }).then((path: string | string[] | null) => {
-        if (path == null) return;
+        if (typeof path != "string") return;
 
         invoke("set_path", { path: path }).then(() => {
           invoke("read_file").then((contents) => {
-            if (typeof contents == "string") {
-              setContents(contents);
+            if (typeof contents != "string") return;
+            setContents(contents);
 
-              // 編集中のファイルが変わったので、ファイルパスを更新する
-              setFilePath(path as string);
+            // 編集中のファイルが変わったので、ファイルパスを更新する
+            setFilePath(path);
 
-              basename(path as string).then((basename) => {
-                if (typeof basename != "string") return;
+            basename(path).then((basename) => {
+              if (typeof basename != "string") return;
 
-                setFileName(basename);
+              setFileName(basename);
 
-                getName().then((name) => {
-                  appWindow.setTitle(`${basename} - ${name}`);
-                });
+              getName().then((name) => {
+                appWindow.setTitle(`${basename} - ${name}`);
               });
-            }
+            });
+
+            // 既存のファイル監視を停止する
+            execAllStopWatcher();
+
+            // ファイルの変更を監視して、ファイルが変更されたらファイルを読み込む
+            watchImmediate(
+              [path],
+              () => {
+                invoke("read_file").then((contents) => {
+                  if (typeof contents != "string") return;
+
+                  setContents(contents);
+                });
+              },
+              {}
+            ).then((response) => {
+              appendStopWatcher(response);
+            });
           });
         });
       });
