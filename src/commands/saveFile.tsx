@@ -18,8 +18,8 @@ import { fileNameState, filePathState } from "./fileInfo";
  * 取得したパスのファイルにテキストを保存する
  */
 export const saveFile: ICommand = {
-  name: "savefile",
-  keyCommand: "savefile",
+  name: "save-file",
+  keyCommand: "saveFile",
   shortcuts: "ctrlcmd+shift+s",
   buttonProps: {
     "aria-label": "Save File (Ctrl+Shift+S)",

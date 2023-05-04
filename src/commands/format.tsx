@@ -9,8 +9,8 @@ export const format: ICommand = {
   keyCommand: "format",
   shortcuts: "alt+shift+f",
   buttonProps: {
-    "aria-label": "Format File (Alt+Shift+F)",
-    title: "Format (Alt+Shift+F)",
+    "aria-label": "Format Document (Alt+Shift+F)",
+    title: "Format Document(Alt+Shift+F)",
   },
   icon: <span id="titlebar-format">Format</span>,
   execute: (state: commands.ExecuteState, api: commands.TextAreaTextApi) => {

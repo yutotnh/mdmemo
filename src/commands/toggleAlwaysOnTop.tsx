@@ -74,8 +74,8 @@ export const toggleAlwaysOnTop: ICommand = {
     return (
       <button
         id="titlebar-toggle-always-on-top"
-        aria-label="Toggle always on top"
-        title="Toggle always on top"
+        aria-label="Toggle Always on Top"
+        title="Toggle Always on Top"
         onClick={() => {
           executeCommand(command, command.groupName);
 

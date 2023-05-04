@@ -7,7 +7,7 @@ import { ICommand } from "@uiw/react-md-editor";
 export const closeWindow: ICommand = {
   name: "close-window",
   keyCommand: "closeWindow",
-  buttonProps: { "aria-label": "Close window", title: "Close window" },
+  buttonProps: { "aria-label": "Close Window", title: "Close Window" },
   icon: (
     <span id="titlebar-close" style={{ filter: "grayscale(100%)" }}>
       ✕

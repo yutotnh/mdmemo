@@ -13,7 +13,7 @@ export const about: ICommand = {
     "aria-label": "About",
     title: "About",
   },
-  icon: <span id="titlebar-about"> About </span>,
+  icon: <span id="titlebar-about">About</span>,
   execute: () => {
     const printAbout = async () => {
       const appName = await getName();

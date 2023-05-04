@@ -22,7 +22,7 @@ export const fileNameState = atom({
  * ファイル名とパスを表示するコマンド
  */
 export const fileInfo: ICommand = {
-  name: "file info",
+  name: "file-info",
   keyCommand: "fileInfo",
 
   render: () => {

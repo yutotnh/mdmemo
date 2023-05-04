@@ -18,8 +18,8 @@ import { fileNameState, filePathState } from "./fileInfo";
  * 取得したパスのファイルのテキストを取得し、エディタに表示する
  */
 export const openFile: ICommand = {
-  name: "openfile",
-  keyCommand: "openfile",
+  name: "open-file",
+  keyCommand: "openFile",
   shortcuts: "ctrlcmd+o",
   render: (command, disabled, executeCommand) => {
     const setContents = useSetRecoilState(contentsState);
