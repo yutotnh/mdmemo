@@ -1,6 +1,12 @@
-import { ICommand, commands } from "@uiw/react-md-editor";
-import { invoke } from "@tauri-apps/api/tauri";
+import { getName } from "@tauri-apps/api/app";
 import { save } from "@tauri-apps/api/dialog";
+import { basename } from "@tauri-apps/api/path";
+import { invoke } from "@tauri-apps/api/tauri";
+import { appWindow } from "@tauri-apps/api/window";
+import { ICommand } from "@uiw/react-md-editor";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import { contentsState } from "../App";
+import { fileNameState, filePathState } from "./fileInfo";
 
 /**
  * テキストをファイルに保存するコマンド
@@ -17,23 +23,52 @@ export const saveFile: ICommand = {
     "aria-label": "Save File (Ctrl+Shift+S)",
     title: "Save File (Ctrl+Shift+S)",
   },
-  icon: <span id="titlebar-file">Save File</span>,
-  execute: (state: commands.ExecuteState) => {
-    save({
-      filters: [
-        { name: "Markdown", extensions: ["md"] },
-        { name: "All", extensions: ["*"] },
-      ],
-    }).then((path: string | null) => {
-      if (path == null) return;
+  render: (command, disabled, executeCommand) => {
+    const contents = useRecoilValue(contentsState);
+    const setFilePath = useSetRecoilState(filePathState);
+    const setFileName = useSetRecoilState(fileNameState);
 
-      invoke("set_path", { path: path }).then(() => {
-        invoke("write_file", { contents: state.text }).then(() => {
-          // タイトルバーのファイル名を更新するためにリロードする
-          // 本当はもっといい方法があるはず
-          window.location.reload();
+    function saveFile() {
+      save({
+        filters: [
+          { name: "Markdown", extensions: ["md"] },
+          { name: "All", extensions: ["*"] },
+        ],
+      }).then((path: string | null) => {
+        if (path == null) return;
+
+        invoke("set_path", { path: path }).then(() => {
+          invoke("write_file", { contents: contents }).then(() => {
+            // 編集中のファイルが変わったので、ファイルパスを更新する
+            setFilePath(path);
+
+            basename(path).then((basename) => {
+              if (typeof basename != "string") return;
+
+              setFileName(basename);
+
+              getName().then((name) => {
+                appWindow.setTitle(`${basename} - ${name}`);
+              });
+            });
+          });
         });
       });
-    });
+    }
+
+    return (
+      <button
+        id="titlebar-file-save"
+        aria-label="Save File (Ctrl+Shift+S)"
+        title="Save File (Ctrl+Shift+S)"
+        disabled={disabled}
+        onClick={() => {
+          executeCommand(command);
+          saveFile();
+        }}
+      >
+        Save File
+      </button>
+    );
   },
 };

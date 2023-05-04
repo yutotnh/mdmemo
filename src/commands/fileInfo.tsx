@@ -3,9 +3,20 @@ import { basename } from "@tauri-apps/api/path";
 import { invoke } from "@tauri-apps/api/tauri";
 import { appWindow } from "@tauri-apps/api/window";
 import { ICommand } from "@uiw/react-md-editor";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { atom, useRecoilState } from "recoil";
 import { watchImmediate } from "tauri-plugin-fs-watch-api";
 import { appendStopWatcher } from "../watchFile";
+
+export const filePathState = atom({
+  key: "filePathState",
+  default: "",
+});
+
+export const fileNameState = atom({
+  key: "fileNameState",
+  default: "",
+});
 
 /**
  * ファイル名とパスを表示するコマンド
@@ -15,8 +26,8 @@ export const fileInfo: ICommand = {
   keyCommand: "fileInfo",
 
   render: () => {
-    const [filePath, setFilePath] = useState("");
-    const [fileName, setFileName] = useState("");
+    const [filePath, setFilePath] = useRecoilState(filePathState);
+    const [fileName, setFileName] = useRecoilState(fileNameState);
     useEffect(() => {
       setFileInfo();
     }, []);

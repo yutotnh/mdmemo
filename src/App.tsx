@@ -1,20 +1,26 @@
 import { invoke } from "@tauri-apps/api/tauri";
 import MDEditor, { PreviewType, commands } from "@uiw/react-md-editor";
 import { useEffect, useState } from "react";
+import { atom, useRecoilState } from "recoil";
+import { watchImmediate } from "tauri-plugin-fs-watch-api";
 import "./App.css";
 import { about } from "./commands/about";
 import { closeWindow } from "./commands/closeWindow";
+import { fileInfo } from "./commands/fileInfo";
 import { format } from "./commands/format";
 import { isFileOpen, openFile } from "./commands/openFile";
 import { saveFile } from "./commands/saveFile";
 import { toggleAlwaysOnTop } from "./commands/toggleAlwaysOnTop";
 import * as zoom from "./commands/zoom";
-import { watchImmediate } from "tauri-plugin-fs-watch-api";
 import { appendStopWatcher } from "./watchFile";
-import { fileInfo } from "./commands/fileInfo";
+
+export const contentsState = atom({
+  key: "contentsState",
+  default: "",
+});
 
 function App() {
-  const [contents, setContents] = useState("");
+  const [contents, setContents] = useRecoilState(contentsState);
   const [preview, setPreview] = useState<PreviewType>("edit");
   const [hiddenToolbar, setHiddenToolbar] = useState(false);
 
