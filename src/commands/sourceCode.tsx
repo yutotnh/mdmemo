@@ -13,6 +13,6 @@ export const sourceCode: ICommand = {
   },
   icon: <span id="titlebar-about">Source Code</span>,
   execute: () => {
-    open("https://google.com");
+    open("https://github.com/yutotnh/mdmemo");
   },
 };
