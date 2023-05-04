@@ -40,7 +40,6 @@ export const toggleAlwaysOnTop: ICommand = {
      * 常に最前面に表示するかどうかを切り替える
      */
     function toggleAlwaysOnTop() {
-      executeCommand(command, command.groupName);
       invoke("get_always_on_top").then((isAlwaysOnTop) => {
         if (typeof isAlwaysOnTop != "boolean") return;
 
@@ -77,7 +76,11 @@ export const toggleAlwaysOnTop: ICommand = {
         id="titlebar-toggle-always-on-top"
         aria-label="Toggle always on top"
         title="Toggle always on top"
-        onClick={toggleAlwaysOnTop}
+        onClick={() => {
+          executeCommand(command, command.groupName);
+
+          toggleAlwaysOnTop();
+        }}
         disabled={disabled}
         type="button"
         style={{
