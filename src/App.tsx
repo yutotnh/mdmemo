@@ -8,7 +8,7 @@ import { about } from "./commands/about";
 import { closeWindow } from "./commands/closeWindow";
 import { fileInfo } from "./commands/fileInfo";
 import { format } from "./commands/format";
-import { isFileOpen, openFile } from "./commands/openFile";
+import { openFile } from "./commands/openFile";
 import { saveFile } from "./commands/saveFile";
 import { toggleAlwaysOnTop } from "./commands/toggleAlwaysOnTop";
 import * as zoom from "./commands/zoom";
@@ -34,9 +34,6 @@ function App() {
   }
 
   window.onblur = () => {
-    // 開いたファイルの中身が表示されないため、"開く"ダイアログが開かれている場合はプレビューを表示しない
-    if (isFileOpen) return;
-
     setPreview("preview");
   };
 
