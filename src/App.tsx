@@ -29,7 +29,7 @@ function App() {
   /**
    * ファイルの中身を保存する
    *
-   * 直近の入力から500ms経過しから保存する
+   * 直近の入力から1s経過しから保存する
    *
    * @param contents ファイルの中身
    */
@@ -41,7 +41,7 @@ function App() {
     setTimerId(
       setTimeout(() => {
         invoke("write_file", { contents: contents });
-      }, 500)
+      }, 1000)
     );
   }
 
