@@ -7,11 +7,11 @@ import { ICommand } from "@uiw/react-md-editor";
  * アプリの情報を表示するコマンド
  */
 export const about: ICommand = {
-  name: "version",
-  keyCommand: "version",
+  name: "about",
+  keyCommand: "about",
   buttonProps: {
-    "aria-label": "Version",
-    title: "Version",
+    "aria-label": "About",
+    title: "About",
   },
   icon: <span id="titlebar-about"> About </span>,
   execute: () => {
