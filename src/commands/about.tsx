@@ -115,7 +115,14 @@ export const about: ICommand = {
         version: await os.version(),
       };
 
-      const text = `${appName}\n\nVersion: ${appVersion}\nCommit\n: ${commitHash}\nDate: ${commitDate} (${timeAgo})\nTauri: ${tauriVersion}\nOS: ${osInfo.type} ${osInfo.arch} ${osInfo.version}`;
+      const text =
+        `${appName}\n` +
+        `\n` +
+        `Version: ${appVersion}\n` +
+        `Commit: ${commitHash}\n` +
+        `Date: ${commitDate} (${timeAgo})\n` +
+        `Tauri: ${tauriVersion}\n` +
+        `OS: ${osInfo.type} ${osInfo.arch} ${osInfo.version}`;
 
       // 以下のようなダイアログにしたいので、標準のダイアログの配置から変更する(Ok/Cancelのボタンを入れ替える)
       // - 左のボタンを押したらクリップボードに表示内容をコピーする
