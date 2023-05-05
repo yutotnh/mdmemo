@@ -1,7 +1,7 @@
 {
   "build": {
-    "beforeDevCommand": "yarn dev",
-    "beforeBuildCommand": "yarn build",
+    "beforeDevCommand": "python3 scripts/commit_info.py > src/commit_info.json && yarn dev",
+    "beforeBuildCommand": "python3 scripts/commit_info.py > src/commit_info.json && yarn build",
     "devPath": "http://localhost:1420",
     "distDir": "../dist",
     "withGlobalTauri": false
@@ -64,7 +64,6 @@
         "providerShortName": null,
         "signingIdentity": null
       },
-      "resources": [],
       "shortDescription": "",
       "targets": "all",
       "windows": {
