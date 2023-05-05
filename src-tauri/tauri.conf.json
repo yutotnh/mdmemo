@@ -1,7 +1,7 @@
 {
   "build": {
-    "beforeDevCommand": "yarn dev",
-    "beforeBuildCommand": "yarn build",
+    "beforeDevCommand": "git rev-parse HEAD > commit_hash.txt && yarn dev",
+    "beforeBuildCommand": "git rev-parse HEAD > commit_hash.txt && yarn build",
     "devPath": "http://localhost:1420",
     "distDir": "../dist",
     "withGlobalTauri": false
@@ -21,6 +21,11 @@
         "confirm": true,
         "open": true,
         "save": true
+      },
+      "fs": {
+        "all": false,
+        "readFile": true,
+        "scope": ["$RESOURCE/**"]
       },
       "os": {
         "all": true
@@ -64,7 +69,7 @@
         "providerShortName": null,
         "signingIdentity": null
       },
-      "resources": [],
+      "resources": ["../commit_hash.txt"],
       "shortDescription": "",
       "targets": "all",
       "windows": {
