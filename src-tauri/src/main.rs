@@ -7,6 +7,8 @@ pub mod file;
 
 use std::sync::Mutex;
 
+use tauri::Manager;
+
 /// Zooms the window in or out
 ///
 /// * `window` - The window to zoom
@@ -57,6 +59,15 @@ fn get_always_on_top(state_always_on_top: tauri::State<IsAlwaysOnTop>) -> bool {
 
 fn main() {
     tauri::Builder::default()
+        .setup(|app| {
+            #[cfg(debug_assertions)] // only include this code on debug builds
+            {
+                let window = app.get_window("main").unwrap();
+                window.open_devtools();
+                window.close_devtools();
+            }
+            Ok(())
+        })
         .plugin(tauri_plugin_fs_watch::init())
         .invoke_handler(tauri::generate_handler![
             zoom_window,
