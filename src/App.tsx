@@ -49,26 +49,6 @@ function App() {
     );
   }
 
-  window.onblur = () => {
-    setPreview("preview");
-  };
-
-  window.onfocus = () => {
-    setPreview("edit");
-  };
-
-  window.addEventListener("mouseover", () => {
-    setHiddenToolbar(false);
-
-    // ツールバーをドラッグ可能にする
-    let toolbar = document.querySelector(".w-md-editor-toolbar");
-    toolbar?.setAttribute("data-tauri-drag-region", "");
-  });
-
-  window.addEventListener("mouseout", () => {
-    setHiddenToolbar(true);
-  });
-
   useEffect(() => {
     // リロード時にファイルを読み込む
     invoke("read_file").then((contents) => {
@@ -91,6 +71,26 @@ function App() {
         });
       })
       .catch(() => {});
+ 
+    window.onblur = () => {
+      setPreview("preview");
+    };
+
+    window.onfocus = () => {
+      setPreview("edit");
+    };
+
+    window.addEventListener("mouseover", () => {
+      setHiddenToolbar(false);
+
+      // ツールバーをドラッグ可能にする
+      let toolbar = document.querySelector(".w-md-editor-toolbar");
+      toolbar?.setAttribute("data-tauri-drag-region", "");
+    });
+
+    window.addEventListener("mouseout", () => {
+      setHiddenToolbar(true);
+    });
 
     // ウィンドウを閉じるイベントが発火したら、ファイルを保存する
     let unListen = (async () => {
@@ -99,6 +99,7 @@ function App() {
       });
       return unListen;
     })();
+
 
     return () => {
       unListen.then((unListen) => unListen());
