@@ -14,7 +14,6 @@ import { sourceCode } from "./commands/sourceCode";
 import { toggleAlwaysOnTop } from "./commands/toggleAlwaysOnTop";
 import * as zoom from "./commands/zoom";
 import { appendStopWatcher } from "./watchFile";
-import { appWindow } from "@tauri-apps/api/window";
 
 export const contentsState = atom({
   key: "contentsState",
@@ -91,18 +90,6 @@ function App() {
     window.addEventListener("mouseout", () => {
       setHiddenToolbar(true);
     });
-
-    // ウィンドウを閉じるイベントが発火したら、ファイルを保存する
-    let unListen = (async () => {
-      const unListen = await appWindow.onCloseRequested(() => {
-        invoke("write_file");
-      });
-      return unListen;
-    })();
-
-    return () => {
-      unListen.then((unListen) => unListen());
-    };
   }, []);
 
   return (

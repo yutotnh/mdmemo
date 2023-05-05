@@ -24,6 +24,10 @@ export function Close() {
 
     isCloseRequest = true;
 
+    // ファイルの遅延保存機能があるため、ファイルが保存されていない可能性がある
+    // そのため、内容を全て保存してからウィンドウを閉じる
+    invoke("write_file");
+
     invoke("get_path")
       // Okで帰ってきたときは、ファイルに保存されているので、そのままウィンドウを閉じる
       .then(() => {
