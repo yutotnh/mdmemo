@@ -31,6 +31,9 @@ export const saveFile: ICommand = {
     const setFileName = useSetRecoilState(fileNameState);
 
     function saveFile() {
+      // 未保存の変更があるかもしれないので、内容をファイルに書き込む
+      invoke("write_file");
+
       save({
         filters: [
           { name: "Markdown", extensions: ["md"] },

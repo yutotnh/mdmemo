@@ -27,6 +27,9 @@ export const openFile: ICommand = {
     const setFileName = useSetRecoilState(fileNameState);
 
     function openFile() {
+      // 未保存の変更があるかもしれないので、内容をファイルに書き込む
+      invoke("write_file");
+
       open({
         multiple: false,
         directory: false,
