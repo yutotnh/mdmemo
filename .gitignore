@@ -24,4 +24,4 @@ dist-ssr
 *.sw?
 
 # 自動生成されるファイル
-commit_hash.txt
+commit_info.json

@@ -21,8 +21,10 @@ export const about: ICommand = {
       const appName = await getName();
       const appVersion = await getVersion();
 
-      const resourcePath = await resolveResource("../commit_hash.txt");
-      const commitHash = (await readTextFile(resourcePath)).trim();
+      const resourcePath = await resolveResource("../commit_info.json");
+      const commitInfo = await readTextFile(resourcePath);
+      const commitHash = JSON.parse(commitInfo).commit_hash;
+      const commitDate = JSON.parse(commitInfo).commit_date;
 
       const tauriVersion = await getTauriVersion();
       const osInfo = {
@@ -31,7 +33,7 @@ export const about: ICommand = {
         version: await os.version(),
       };
 
-      const text = `${appName}\nVersion: ${appVersion}\nCommit\n: ${commitHash}\nTauri: ${tauriVersion}\nOS: ${osInfo.type} ${osInfo.arch} ${osInfo.version}`;
+      const text = `${appName}\n\nVersion: ${appVersion}\nCommit\n: ${commitHash}\nDate: ${commitDate}\nTauri: ${tauriVersion}\nOS: ${osInfo.type} ${osInfo.arch} ${osInfo.version}`;
 
       // 以下のようなダイアログにしたいので、標準のダイアログの配置から変更する(Ok/Cancelのボタンを入れ替える)
       // - 左のボタンを押したらクリップボードに表示内容をコピーする
