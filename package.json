@@ -4,8 +4,11 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "predev": "python3 scripts/commit_info.py > src/commit_info.json",
     "dev": "vite",
+    "prebuild": "python3 scripts/commit_info.py > src/commit_info.json",
     "build": "tsc && vite build",
+    "prepreview": "python3 scripts/commit_info.py > src/commit_info.json",
     "preview": "vite preview",
     "tauri": "tauri"
   },
