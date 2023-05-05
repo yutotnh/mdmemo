@@ -71,7 +71,7 @@ function App() {
         });
       })
       .catch(() => {});
- 
+
     window.onblur = () => {
       setPreview("preview");
     };
@@ -99,7 +99,6 @@ function App() {
       });
       return unListen;
     })();
-
 
     return () => {
       unListen.then((unListen) => unListen());
