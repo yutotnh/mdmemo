@@ -14,6 +14,7 @@ import { sourceCode } from "./commands/sourceCode";
 import { toggleAlwaysOnTop } from "./commands/toggleAlwaysOnTop";
 import * as zoom from "./commands/zoom";
 import { appendStopWatcher } from "./watchFile";
+import { appWindow } from "@tauri-apps/api/window";
 
 export const contentsState = atom({
   key: "contentsState",
@@ -37,10 +38,13 @@ function App() {
     if (timerId != null) {
       clearTimeout(timerId);
     }
+
     setContents(contents);
+    invoke("save_contents", { contents: contents });
+
     setTimerId(
       setTimeout(() => {
-        invoke("write_file", { contents: contents });
+        invoke("write_file");
       }, 1000)
     );
   }
@@ -67,7 +71,9 @@ function App() {
 
   useEffect(() => {
     // リロード時にファイルを読み込む
-    invoke("read_file").then((contents) => setContents(contents as string));
+    invoke("read_file").then((contents) => {
+      setContents(contents as string);
+    });
 
     invoke("get_path")
       .then((response) => {
@@ -85,6 +91,18 @@ function App() {
         });
       })
       .catch(() => {});
+
+    // ウィンドウを閉じるイベントが発火したら、ファイルを保存する
+    let unListen = (async () => {
+      const unListen = await appWindow.onCloseRequested(() => {
+        invoke("write_file");
+      });
+      return unListen;
+    })();
+
+    return () => {
+      unListen.then((unListen) => unListen());
+    };
   }, []);
 
   return (

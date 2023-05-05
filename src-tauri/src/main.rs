@@ -64,6 +64,7 @@ fn main() {
             get_always_on_top,
             file::command::set_path,
             file::command::read_file,
+            file::command::save_contents,
             file::command::write_file,
             file::command::get_path,
         ])

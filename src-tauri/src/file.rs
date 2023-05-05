@@ -29,10 +29,11 @@ trait FileReadWrite {
     /// Reads the file
     fn read(&self) -> Result<String, std::io::Error>;
 
+    /// Saves the contents to write to a file
+    fn save_contents(&self, contents: String);
+
     /// Writes to the file
-    ///
-    /// * `content` - The content to write to the file
-    fn write(&self, content: String) -> Result<(), std::io::Error>;
+    fn write(&self) -> Result<(), std::io::Error>;
 }
 
 impl FileReadWrite for File {
@@ -58,15 +59,20 @@ impl FileReadWrite for File {
 
         let mut contents = String::new();
         match file.read_to_string(&mut contents) {
-            Ok(_) => Ok(contents),
+            Ok(_) => {
+                self.save_contents(contents.clone());
+                Ok(contents)
+            }
             Err(e) => Err(e),
         }
     }
 
-    fn write(&self, contents: String) -> Result<(), std::io::Error> {
-        let file_path = self.path.lock().unwrap();
+    fn save_contents(&self, contents: String) {
+        *self.contents.lock().unwrap() = contents;
+    }
 
-        *self.contents.lock().unwrap() = contents.clone();
+    fn write(&self) -> Result<(), std::io::Error> {
+        let file_path = self.path.lock().unwrap();
 
         if !file_path.is_empty() {
             let mut file = match std::fs::File::create(file_path.as_str()) {
@@ -74,6 +80,7 @@ impl FileReadWrite for File {
                 Err(e) => return Err(e),
             };
 
+            let contents = self.contents.lock().unwrap();
             match file.write_all(contents.as_bytes()) {
                 Ok(_) => return Ok(()),
                 Err(e) => return Err(e),
@@ -115,18 +122,20 @@ pub mod command {
         }
     }
 
+    /// Saves the contents to write to a file
+    #[tauri::command]
+    pub fn save_contents(contents: String, file: State<File>) {
+        file.save_contents(contents);
+    }
+
     /// Overwrites the contents of a file
     ///
     /// * `contents` - The contents to write to the file
     /// * `file` - The file state
     /// * `window` - The window to open the file dialog in
     #[tauri::command]
-    pub fn write_file(
-        contents: String,
-        file: State<File>,
-        window: tauri::Window,
-    ) -> Result<(), String> {
-        match file.write(contents) {
+    pub fn write_file(file: State<File>, window: tauri::Window) -> Result<(), String> {
+        match file.write() {
             Ok(_) => Ok(()),
             Err(e) => {
                 tauri::api::dialog::message(Some(&window), "Error", e.to_string());
