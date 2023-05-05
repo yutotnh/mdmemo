@@ -32,7 +32,7 @@ export const about: ICommand = {
       //   - コピーしたらダイアログを閉じる(これは目的ではなくて、ダイアログの仕様)
       // - 右のボタンを押したらダイアログを閉じる
       confirm(text, {
-        title: "About",
+        title: "mdmemo",
         type: "info",
         okLabel: "Copy",
         cancelLabel: "OK",
