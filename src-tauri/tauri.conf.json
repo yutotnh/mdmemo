@@ -1,7 +1,7 @@
 {
   "build": {
-    "beforeDevCommand": "git log -1 --pretty=format:{\"commit_hash\":\"%H\",\"commit_date\":\"%cI\"} > commit_info.json && yarn dev",
-    "beforeBuildCommand": "git log -1 --pretty=format:{\"commit_hash\":\"%H\",\"commit_date\":\"%cI\"} > commit_info.json && yarn build",
+    "beforeDevCommand": "git log -1 --pretty=format:{\"hash\":\"%H\",\"date\":\"%cI\"} > src/commit_info.json && yarn dev",
+    "beforeBuildCommand": "git log -1 --pretty=format:{\"hash\":\"%H\",\"date\":\"%cI\"} > src/commit_info.json && yarn build",
     "devPath": "http://localhost:1420",
     "distDir": "../dist",
     "withGlobalTauri": false
@@ -21,11 +21,6 @@
         "confirm": true,
         "open": true,
         "save": true
-      },
-      "fs": {
-        "all": false,
-        "readFile": true,
-        "scope": ["$RESOURCE/**"]
       },
       "os": {
         "all": true
@@ -69,7 +64,6 @@
         "providerShortName": null,
         "signingIdentity": null
       },
-      "resources": ["../commit_info.json"],
       "shortDescription": "",
       "targets": "all",
       "windows": {

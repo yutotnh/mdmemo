@@ -2,8 +2,7 @@ import { getName, getTauriVersion, getVersion } from "@tauri-apps/api/app";
 import * as os from "@tauri-apps/api/os";
 import { confirm } from "@tauri-apps/api/dialog";
 import { ICommand } from "@uiw/react-md-editor";
-import { resolveResource } from "@tauri-apps/api/path";
-import { readTextFile } from "@tauri-apps/api/fs";
+import CommitInfo from "../commit_info.json";
 
 /**
  * アプリの情報を表示するコマンド
@@ -21,10 +20,8 @@ export const about: ICommand = {
       const appName = await getName();
       const appVersion = await getVersion();
 
-      const resourcePath = await resolveResource("../commit_info.json");
-      const commitInfo = await readTextFile(resourcePath);
-      const commitHash = JSON.parse(commitInfo).commit_hash;
-      const commitDate = JSON.parse(commitInfo).commit_date;
+      const commitHash = CommitInfo.hash;
+      const commitDate = CommitInfo.date;
 
       const tauriVersion = await getTauriVersion();
       const osInfo = {
