@@ -1,7 +1,7 @@
 {
   "build": {
     "beforeDevCommand": "git log -1 --pretty=format:{\"commit_hash\":\"%H\",\"commit_date\":\"%cI\"} > commit_info.json && yarn dev",
-    "beforeBuildCommand": "git log -1 --pretty=format:{\"commit_hash\":\"%H\",\"commit_date\":\"%cI\"} > commit_info.json > commit_hash.txt && yarn build",
+    "beforeBuildCommand": "git log -1 --pretty=format:{\"commit_hash\":\"%H\",\"commit_date\":\"%cI\"} > commit_info.json && yarn build",
     "devPath": "http://localhost:1420",
     "distDir": "../dist",
     "withGlobalTauri": false
