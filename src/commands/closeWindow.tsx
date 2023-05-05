@@ -1,10 +1,4 @@
-import { CloseRequestedEvent, appWindow } from "@tauri-apps/api/window";
 import { ICommand } from "@uiw/react-md-editor";
-import { useRecoilValue } from "recoil";
-import { contentsState } from "../App";
-import { invoke } from "@tauri-apps/api";
-import { confirm } from "@tauri-apps/api/dialog";
-import { useEffect, useState } from "react";
 import { TauriEvent, emit } from "@tauri-apps/api/event";
 
 /**
@@ -13,12 +7,11 @@ import { TauriEvent, emit } from "@tauri-apps/api/event";
 export const closeWindow: ICommand = {
   name: "close-window",
   keyCommand: "closeWindow",
-  buttonProps: { "aria-label": "Close Window", title: "Close Window" },
   render: (command, disabled, executeCommand) => {
     return (
       <button
         id="titlebar-close"
-        area-aria-label="Close Window"
+        area-label="Close Window"
         title="Close Window"
         disabled={disabled}
         onClick={() => {
