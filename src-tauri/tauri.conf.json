@@ -1,7 +1,7 @@
 {
   "build": {
-    "beforeDevCommand": "git log -1 --pretty=format:{\"hash\":\"%H\",\"date\":\"%cI\"} > src/commit_info.json && yarn dev",
-    "beforeBuildCommand": "git log -1 --pretty=format:{\"hash\":\"%H\",\"date\":\"%cI\"} > src/commit_info.json && yarn build",
+    "beforeDevCommand": "python3 scripts/commit_info.py > src/commit_info.json && yarn dev",
+    "beforeBuildCommand": "python3 scripts/commit_info.py > src/commit_info.json && yarn build",
     "devPath": "http://localhost:1420",
     "distDir": "../dist",
     "withGlobalTauri": false
