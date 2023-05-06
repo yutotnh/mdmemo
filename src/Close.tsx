@@ -52,7 +52,7 @@ export function Close() {
       });
   }
 
-  // ウィンドウを閉じるイベントが発火したら、ウィンドウを閉じる処理を実行するようにする
+  // ウィンドウを閉じるイベントが発火したら、ウィンドウを閉じる処理を実行する
   useEffect(() => {
     let unListen = (async () => {
       const unListen = await appWindow.onCloseRequested((event) => {
