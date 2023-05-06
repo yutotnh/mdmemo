@@ -36,7 +36,6 @@ export function Close() {
       // Errで帰ってきたときは、ファイルに保存されていないので、保存するかどうかを確認する
       .catch(() => {
         confirm("Do you want to close this window without saving changes?", {
-          title: "mdmemo",
           type: "warning",
           okLabel: "OK",
           cancelLabel: "Cancel",
@@ -53,7 +52,7 @@ export function Close() {
       });
   }
 
-  // ウィンドウを閉じるイベントが発火したら、ウィンドウを閉じる処理を実行するようにする
+  // ウィンドウを閉じるイベントが発火したら、ウィンドウを閉じる処理を実行する
   useEffect(() => {
     let unListen = (async () => {
       const unListen = await appWindow.onCloseRequested((event) => {
