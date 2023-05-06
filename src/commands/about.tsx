@@ -115,14 +115,17 @@ export const about: ICommand = {
         version: await os.version(),
       };
 
-      const text =
-        `${appName}\n` +
-        `\n` +
+      let text =
         `Version: ${appVersion}\n` +
         `Commit: ${commitHash}\n` +
         `Date: ${commitDate} (${timeAgo})\n` +
         `Tauri: ${tauriVersion}\n` +
         `OS: ${osInfo.type} ${osInfo.arch} ${osInfo.version}`;
+
+      // Windowsの場合はmdmemoのバージョン情報を先頭に追加する(2行目は見栄えのため空行にする)
+      if (osInfo.type === "Windows_NT") {
+        text = `${appName}\n\n` + text;
+      }
 
       // 以下のようなダイアログにしたいので、標準のダイアログの配置から変更する(Ok/Cancelのボタンを入れ替える)
       // - 左のボタンを押したらクリップボードに表示内容をコピーする
