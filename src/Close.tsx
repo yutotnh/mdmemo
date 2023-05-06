@@ -36,7 +36,6 @@ export function Close() {
       // Errで帰ってきたときは、ファイルに保存されていないので、保存するかどうかを確認する
       .catch(() => {
         confirm("Do you want to close this window without saving changes?", {
-          title: "mdmemo",
           type: "warning",
           okLabel: "OK",
           cancelLabel: "Cancel",
