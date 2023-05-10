@@ -115,17 +115,23 @@ export const about: ICommand = {
         version: await os.version(),
       };
 
-      const text =
+      const clipbordText =
+        `Version: ${appVersion}\n` +
+        `Commit: ${commitHash}\n` +
+        `Date: ${commitDate}\n` +
+        `Tauri: ${tauriVersion}\n` +
+        `OS: ${osInfo.type} ${osInfo.arch} ${osInfo.version}`;
+
+      let text =
         `Version: ${appVersion}\n` +
         `Commit: ${commitHash}\n` +
         `Date: ${commitDate} (${timeAgo})\n` +
         `Tauri: ${tauriVersion}\n` +
         `OS: ${osInfo.type} ${osInfo.arch} ${osInfo.version}`;
 
-      let confirmText = text;
       // Windowsの場合はアプリ名を先頭に追加する(2行目は見栄えのため空行にする)
       if (osInfo.type === "Windows_NT") {
-        confirmText = `${appName}\n\n` + text;
+        text = `${appName}\n\n` + text;
       }
 
       // 以下のようなダイアログにしたいので、標準のダイアログの配置から変更する(Ok/Cancelのボタンを入れ替える)
@@ -133,13 +139,13 @@ export const about: ICommand = {
       //   - コピーする文字列にWindows限定のアプリ名は含めない
       //   - コピーしたらダイアログを閉じる(これは目的ではなくて、ダイアログの仕様)
       // - 右のボタンを押したらダイアログを閉じる
-      confirm(confirmText, {
+      confirm(text, {
         type: "info",
         okLabel: "Copy",
         cancelLabel: "OK",
       }).then(() => {
         /// コピーする文字列にWindows限定のアプリ名は含めない
-        navigator.clipboard.writeText(text);
+        navigator.clipboard.writeText(clipbordText);
       });
     };
 
