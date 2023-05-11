@@ -13,12 +13,12 @@
   "customizations": {
     "vscode": {
       "extensions": [
-		"esbenp.prettier-vscode",
-		"ms-azuretools.vscode-docker",
-		"redhat.vscode-yaml",
-		"rust-lang.rust-analyzer",
-		"tauri-apps.tauri-vscode"
-	]
+        "esbenp.prettier-vscode",
+        "ms-azuretools.vscode-docker",
+        "redhat.vscode-yaml",
+        "rust-lang.rust-analyzer",
+        "tauri-apps.tauri-vscode"
+      ]
     }
   }
 
