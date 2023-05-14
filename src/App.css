@@ -12,3 +12,9 @@
 .w-md-editor-toolbar {
   padding: 3px 0px;
 }
+
+/* リストのインデントの幅を小さくする */
+.wmde-markdown ul,
+.wmde-markdown ol {
+  padding-left: 1em;
+}
